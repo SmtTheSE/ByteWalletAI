@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter
 
 from app.schemas import PredictBurnRateRequest, PredictBurnRateResponse, RiskyCategory, TriggerRuleFlags
-from app.services import ml_service, rules, llm_service
+from app.services import ml_service, rules, messaging_service
 from app.config import settings
 
 log = logging.getLogger("api")
@@ -62,7 +62,7 @@ async def predict_burn_rate(payload: PredictBurnRateRequest):
         effective_mode = settings.ai_default_mode   # "local_only" or "rules_only"
 
     # ── 6. Generate AI message via Rules Engine ───────────────────────────────
-    ai_message, ai_mode_used = await llm_service.generate_ai_message(
+    ai_message, ai_mode_used = await messaging_service.generate_ai_message(
         nickname = payload.nickname,
         currency = payload.currency,
         stats    = stats,

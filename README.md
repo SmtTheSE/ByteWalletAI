@@ -40,7 +40,7 @@ Wallet Frontend
 │     (app/services/rules.py)
 │                                                           ▼
 │  3. Messaging Service ────────► Deterministic Rules Engine
-│     (app/services/llm_service.py) No PII sent. Runs entirely offline.
+│     (app/services/messaging_service.py) No PII sent. Runs entirely offline.
 │                                                           ▼
 │  4. Response assembled & returned to frontend             │
 └─────────────────────────────────────────────────────────-─┘
@@ -158,7 +158,7 @@ bytewallet_ai/
     config.py                # Environment variable settings
     services/
       ml_service.py          # Model loading + prediction wrapper
-      llm_service.py         # Rules Engine integration
+      messaging_service.py   # Rules Engine integration
       rules.py               # 15th/65% business rule
   ml/
     load_real_data.py        # Load ByteWallet CSVs

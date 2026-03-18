@@ -1,5 +1,5 @@
 """
-app/services/llm_service.py
+app/services/messaging_service.py
 
 Rule-based message generation for ByteWallet AI.
 Produces a short, youth-friendly financial coaching message (max ~50 words).
@@ -9,7 +9,7 @@ All data is handled locally via deterministic math rules.
 import logging
 from typing import Tuple
 
-log = logging.getLogger("llm_service")
+log = logging.getLogger("messaging_service")
 
 def generate_ai_message(
     nickname: str | None,
