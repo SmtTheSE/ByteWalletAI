@@ -1,0 +1,36 @@
+{
+  "user_id": "717d7cec-3eea-479f-95e5-da21d345af77",
+  "nickname": "Ku Kue",
+  "currency": "VND",
+  "current_date": "2026-03-18",
+  "ai_mode": "local_only",
+  "balances": {
+    "banking": 273216,
+    "cash": 0
+  },
+  "monthly_budget": {
+    "total": 3000000,
+    "by_category": {
+      "Food": 1200000,
+      "Transport": 500000,
+      "Shopping": 800000,
+      "Other": 500000
+    }
+  },
+  "essential_obligations": [],
+  "transactions": [
+    {"timestamp": "2026-03-16T06:00:49Z", "amount": 50000,  "category": "Food",      "type": "expense"},
+    {"timestamp": "2026-03-16T08:10:21Z", "amount": 33000,  "category": "Food",      "type": "expense"},
+    {"timestamp": "2026-03-16T10:18:59Z", "amount": 50000,  "category": "Food",      "type": "expense"},
+    {"timestamp": "2026-03-16T10:48:18Z", "amount": 8000,   "category": "Shopping",  "type": "expense"},
+    {"timestamp": "2026-03-16T11:35:01Z", "amount": 25000,  "category": "Food",      "type": "expense"},
+    {"timestamp": "2026-03-16T15:12:59Z", "amount": 61000,  "category": "Food",      "type": "expense"},
+    {"timestamp": "2026-03-17T05:58:19Z", "amount": 30000,  "category": "Food",      "type": "expense"},
+    {"timestamp": "2026-03-17T07:50:46Z", "amount": 100000, "category": "Work",      "type": "expense"},
+    {"timestamp": "2026-03-17T12:08:19Z", "amount": 23000,  "category": "Transport", "type": "expense"},
+    {"timestamp": "2026-03-18T01:41:40Z", "amount": 21000,  "category": "Transport", "type": "expense"},
+    {"timestamp": "2026-03-18T03:59:57Z", "amount": 30000,  "category": "Food",      "type": "expense"},
+    {"timestamp": "2026-03-18T04:00:07Z", "amount": 30000,  "category": "Food",      "type": "expense"},
+    {"timestamp": "2026-03-16T05:58:57Z", "amount": 734216, "category": "Pocket Money","type": "income"}
+  ]
+}
