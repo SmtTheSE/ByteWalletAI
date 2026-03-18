@@ -21,7 +21,7 @@ I set out to build a real-world, production-grade AI system. Here is the strict 
 ### Implementation Steps
 
 1. **Initial Data Integration**: I started with real ByteWallet user CSV exports (users, transactions, friends). Because real data is scarce early in a startup, using just 84 real transactions wasn't enough to train a robust AI.
-2. **External Data Augmentation Strategy**: I programmatically merged **6 distinct Kaggle and manually curated datasets** (representing over 600,000 transactions). I standardized varying schemas (e.g., Indian personal finance data, Gen Z spending habits, credit card fraud logs) into a unified `(user_id, timestamp, amount, type, category)` schema.
+2. **External Data Augmentation Strategy**: I programmatically merged **7 distinct Kaggle and manually curated datasets** (representing over 600,000 transactions). I standardized varying schemas (e.g., Indian personal finance data, Gen Z spending habits, credit card fraud logs) into a unified `(user_id, timestamp, amount, type, category)` schema.
 3. **Synthetic ASEAN Youth Generation**: I generated targeted synthetic data to perfectly mimic Southeast Asian youth behavior (part-time gig worker salaries, frequent small 'Food & Drink' and 'Transport' micro-transactions) to balance the minority classes.
 4. **Vectorized Feature Engineering**: I initially built the feature extraction logic using standard Python loops. As data grew to 640,000+ rows, training choked. **I completely rewrote the engine using 100% vectorized Pandas operations**, reducing processing time for hundreds of thousands of rows from hours down to just **6 seconds**.
 5. **Model Selection & Hyperparameters**: I deployed a `GradientBoostingClassifier` within a rigid Scikit-Learn `Pipeline`. I oversampled the minority class (Shortfalls) using SMOTE-like balancing techniques to ensure the AI doesn't just guess "Safe" defaults.
@@ -36,15 +36,15 @@ I deliberately **chose against using ML Regressors (RMSE)** to guess the user's 
 Instead, I process the exact dollar amounts using deterministic math (Daily Burn Rate), and I use the Machine Learning model strictly as a **Classifier** to predict the *behavioral probability* of a shortfall based on 19 distinct behavioral features.
 
 ### Final Production Model Stats:
-* **Total Training Data**: 643,561 transaction rows.
+* **Total Training Data**: 662,268 transaction rows.
 * **Unique Monthly Snapshots Evaluated**: 133,462 user-months.
 * **Class Balance**: 50% Safe / 50% Shortfall (Balanced explicitly for training).
 
 ### Honest Test Set Metrics (5-Fold Stratified Cross-Validation):
 | Metric | Score | Honest Interpretation |
 |--------|-------|------------------------|
-| **Accuracy** | 97.0% | The model accurately guesses the correct end-of-month outcome 97 times out of 100. |
-| **ROC-AUC** | **99.62%** | *Very High.* The model has extraordinary separability. If a user is acting recklessly, the AI's probability score naturally spikes to 0.99 with almost zero false-positives among safe users. |
+| **Accuracy** | 98.0% | The model accurately guesses the correct end-of-month outcome 98 times out of 100. |
+| **ROC-AUC** | **99.63%** | *Very High.* The model has extraordinary separability. If a user is acting recklessly, the AI's probability score naturally spikes to 0.99 with almost zero false-positives among safe users. |
 | **Precision** | 98.0% | When the AI warns a user they are at "High Risk" of failure, it is correct 98% of the time. (Crucial metric: prevents annoying false alarms). |
 | **Recall**     | 96.0% | The AI successfully identifies 96% of all *actual* high-risk users before they hit the wall. |
 

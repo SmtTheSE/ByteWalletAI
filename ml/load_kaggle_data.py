@@ -313,6 +313,49 @@ def load_user_personal_expense() -> Optional[pd.DataFrame]:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Dataset 7: Gen Z Spending (1,700 users x 15 columns)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def load_genz_spending() -> Optional[pd.DataFrame]:
+    f = _find_csv("genz_spending")
+    if f is None:
+        return None
+    log.info(f"  Loading genz_spending: {f.name}")
+    df = pd.read_csv(f)
+    
+    rows = []
+    for _, row in df.iterrows():
+        uid = f"genz_{row.get('ID', hash(str(row.values)))}"
+        ym = "2024-03" # Treat as a single monthly snapshot
+        
+        inc = pd.to_numeric(row.get("Income (USD)", 0), errors="coerce")
+        if pd.notna(inc) and inc > 0:
+            rows.append((uid, ym, inc, "income", "Salary"))
+            
+        expense_map = {
+            "Rent (USD)": "Rent",
+            "Groceries (USD)": "Food",
+            "Eating Out (USD)": "Food",
+            "Entertainment (USD)": "Entertainment",
+            "Subscription Services (USD)": "Bills",
+            "Education (USD)": "Education",
+            "Online Shopping (USD)": "Shopping",
+            "Travel (USD)": "Transport",
+            "Fitness (USD)": "Health",
+            "Miscellaneous (USD)": "Other"
+        }
+        
+        for col, cat in expense_map.items():
+            amt = pd.to_numeric(row.get(col, 0), errors="coerce")
+            if pd.notna(amt) and amt > 0:
+                rows.append((uid, ym, amt, "expense", cat))
+                
+    out = pd.DataFrame(rows, columns=["user_id", "year_month", "amount", "type", "category"])
+    log.info(f"    → {len(out):,} rows (flattened metrics)")
+    return _to_unified(out)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Master loader
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -332,7 +375,8 @@ def load_all_kaggle() -> pd.DataFrame:
         ("credit_score",           load_credit_score),
         ("credit_fraud",           load_credit_fraud),
         ("expense_classification", load_expense_classification),
-        ("user_personal_expense",  load_user_personal_expense),   # NEW: 100 row dataset
+        ("user_personal_expense",  load_user_personal_expense),
+        ("genz_spending",          load_genz_spending),
     ]
 
     frames = []
