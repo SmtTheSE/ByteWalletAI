@@ -356,6 +356,29 @@ def load_genz_spending() -> Optional[pd.DataFrame]:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Dataset 8: MoMo e-Wallet (13,000+ Vietnam Mobile Topups)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def load_momo_merged() -> Optional[pd.DataFrame]:
+    f = _find_csv("momo_merged")
+    if f is None:
+        return None
+    log.info(f"  Loading momo_merged: {f.name}")
+    df = pd.read_csv(f, low_memory=False)
+    
+    df["_uid"] = df["user_id"].astype(str).apply(lambda x: f"momo_{x}")
+    df["_ym"] = pd.to_datetime(df["Date"], errors="coerce").dt.to_period("M").astype(str)
+    df["_amt"] = pd.to_numeric(df["Amount"], errors="coerce").fillna(0)
+    df["_type"] = "expense"
+    df["_cat"] = "Bills"  # Mobile topups / telecommunication
+    
+    out = df[["_uid","_ym","_amt","_type","_cat"]].copy()
+    out.columns = ["user_id","year_month","amount","type","category"]
+    log.info(f"    → {len(out):,} rows (authentic MoMo transactions)")
+    return _to_unified(out)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Master loader
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -377,6 +400,7 @@ def load_all_kaggle() -> pd.DataFrame:
         ("expense_classification", load_expense_classification),
         ("user_personal_expense",  load_user_personal_expense),
         ("genz_spending",          load_genz_spending),
+        ("momo_merged",            load_momo_merged),
     ]
 
     frames = []

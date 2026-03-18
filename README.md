@@ -143,6 +143,7 @@ python scripts/download_kaggle_datasets.py
 | Financial Fraud Detection | Risk pattern features |
 | Personal Expense Classification | Category standardisation |
 | Personal Finance ML Dataset (32,424 records) | Financial health segmentation |
+| Vietnamese MoMo e-Wallet (13,000+ records) | Authentic Vietnamese mobile top-ups and telecommunication bills |
 
 ---
 
