@@ -25,7 +25,7 @@ I set out to build a real-world, production-grade AI system. Here is the strict 
 3. **Synthetic ASEAN Youth Generation**: I generated targeted synthetic data to perfectly mimic Southeast Asian youth behavior (part-time gig worker salaries, frequent small 'Food & Drink' and 'Transport' micro-transactions) to balance the minority classes.
 4. **Vectorized Feature Engineering**: I initially built the feature extraction logic using standard Python loops. As data grew to 640,000+ rows, training choked. **I completely rewrote the engine using 100% vectorized Pandas operations**, reducing processing time for hundreds of thousands of rows from hours down to just **6 seconds**.
 5. **Model Selection & Hyperparameters**: I deployed a `GradientBoostingClassifier` within a rigid Scikit-Learn `Pipeline`. I oversampled the minority class (Shortfalls) using SMOTE-like balancing techniques to ensure the AI doesn't just guess "Safe" defaults.
-6. **Containerized API (FastAPI)**: I wrapped the standalone model in a highly concurrent FastAPI server, connected a large-language model (Gemini/Ollama) to textually translate the math, and containerized the entire stack via Docker.
+6. **Containerized API (FastAPI)**: I wrapped the standalone model in a highly concurrent FastAPI server, added a deterministic rules engine to securely translate the math into user-friendly text securely offline, and containerized the entire stack via Docker.
 
 ---
 

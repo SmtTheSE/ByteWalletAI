@@ -34,8 +34,8 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="ByteWallet AI",
     description=(
-        "AI-powered financial burn-rate prediction for ASEAN youth. "
-        "Hybrid custom ML model + local Ollama LLM."
+        "AI-powered financial burn-rate prediction for ASEAN youth.\n"
+        "Custom ML Classifier + deterministic on-device reporting."
     ),
     version="1.0.0",
     lifespan=lifespan,

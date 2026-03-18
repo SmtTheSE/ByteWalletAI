@@ -27,7 +27,7 @@ async def predict_burn_rate(payload: PredictBurnRateRequest):
       2. Run ML inference (or rule fallback)
       3. Apply 15th/65% business rule
       4. Determine final risk level
-      5. Generate AI message via Ollama
+      5. Generate message via Rules engine
       6. Assemble and return response
     """
     # ── 1. Snapshot dict ──────────────────────────────────────────────────────
@@ -61,7 +61,7 @@ async def predict_burn_rate(payload: PredictBurnRateRequest):
     if effective_mode == "auto":
         effective_mode = settings.ai_default_mode   # "local_only" or "rules_only"
 
-    # ── 6. Generate AI message via Ollama ─────────────────────────────────────
+    # ── 6. Generate AI message via Rules Engine ───────────────────────────────
     ai_message, ai_mode_used = await llm_service.generate_ai_message(
         nickname = payload.nickname,
         currency = payload.currency,

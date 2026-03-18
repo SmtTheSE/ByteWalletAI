@@ -76,5 +76,5 @@ class PredictBurnRateResponse(BaseModel):
     trigger_rule_flags: TriggerRuleFlags
     top_risky_categories: List[RiskyCategory]
     ai_message: str
-    ai_mode_used: str                     # "local_ollama" | "rules_only"
+    ai_mode_used: str                     # "rules_only"
     generated_at: datetime

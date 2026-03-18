@@ -12,12 +12,8 @@ class Settings(BaseSettings):
         protected_namespaces=(),   # suppress model_ namespace warning
     )
 
-    # Ollama (local LLM)
-    ollama_base_url: str = "http://localhost:11434"
-    ollama_model: str = "llama3.2"
-
-    # AI mode: "local_only" | "rules_only"
-    ai_default_mode: str = "local_only"
+    # AI mode: only rules_only is supported now
+    ai_default_mode: str = "rules_only"
 
     # Model artifacts
     model_path: str = "models/burn_rate_model.pkl"

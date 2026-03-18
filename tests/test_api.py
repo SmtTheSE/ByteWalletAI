@@ -25,7 +25,7 @@ def _high_risk_payload():
         "nickname":     "Ku Kue",
         "currency":     "VND",
         "current_date": "2026-03-14",
-        "ai_mode":      "rules_only",          # no Ollama needed in tests
+        "ai_mode":      "rules_only",
         "balances":     {"banking": 1_500_000, "cash": 0},
         "monthly_budget": {
             "total":       7_000_000,

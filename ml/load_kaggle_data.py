@@ -367,7 +367,7 @@ def load_all_kaggle() -> pd.DataFrame:
     Returns DataFrame with columns:
         user_id, year_month, amount, type, category
     """
-    log.info("\n📦 Loading Kaggle & Extra datasets...")
+    log.info("\nLoading Kaggle & Extra datasets...")
 
     loaders = [
         ("credit_transactions",    load_credit_transactions),
@@ -386,9 +386,9 @@ def load_all_kaggle() -> pd.DataFrame:
             if df is not None and len(df) > 0:
                 df["_source"] = name
                 frames.append(df)
-                log.info(f"  ✅ {name}: {len(df):,} unified rows")
+                log.info(f"  {name}: {len(df):,} unified rows")
         except Exception as e:
-            log.warning(f"  ⚠️  {name} failed: {e}")
+            log.warning(f"  {name} failed: {e}")
 
     if not frames:
         log.warning("  No Kaggle datasets loaded — only real CSV data will be used")
@@ -399,7 +399,7 @@ def load_all_kaggle() -> pd.DataFrame:
     combined["amount"] = pd.to_numeric(combined["amount"], errors="coerce").fillna(0)
     combined = combined[combined["amount"] > 0]
 
-    log.info(f"\n✅ Kaggle total: {len(combined):,} rows from {len(frames)} datasets")
+    log.info(f"\nKaggle total: {len(combined):,} rows from {len(frames)} datasets")
     log.info(f"   type dist: {combined['type'].value_counts().to_dict()}")
     log.info(f"   top categories: {combined['category'].value_counts().head(8).to_dict()}")
     return combined

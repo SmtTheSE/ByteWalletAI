@@ -190,9 +190,9 @@ def balance_classes(X: pd.DataFrame, y: pd.Series) -> tuple[pd.DataFrame, pd.Ser
 # ─────────────────────────────────────────────────────────────────────────────
 
 def main() -> None:
-    log.info("╔══════════════════════════════════════════════════╗")
-    log.info("║   ByteWallet AI — Production Model Training      ║")
-    log.info("╚══════════════════════════════════════════════════╝")
+    log.info("==================================================")
+    log.info("|   ByteWallet AI — Production Model Training      |")
+    log.info("==================================================")
 
     # ── 1. Load real data ─────────────────────────────────────────────────────
     log.info("\n[1/6] Loading real ByteWallet data…")
@@ -316,7 +316,7 @@ def main() -> None:
 
     # ── Save artifacts ─────────────────────────────────────────────────────────
     joblib.dump(model, MODEL_PATH)
-    log.info(f"\n✅ Model saved → {MODEL_PATH}")
+    log.info(f"\nModel saved → {MODEL_PATH}")
 
     config = {
         "feature_columns":    FEATURE_COLUMNS,
@@ -334,10 +334,10 @@ def main() -> None:
     }
     with open(CFG_PATH, "w") as fh:
         json.dump(config, fh, indent=2)
-    log.info(f"✅ Config saved → {CFG_PATH}")
-    log.info("\n╔══════════════════════════════════════════════════╗")
-    log.info("║   Training complete — model ready for serving    ║")
-    log.info("╚══════════════════════════════════════════════════╝")
+    log.info(f"Config saved → {CFG_PATH}")
+    log.info("\n==================================================")
+    log.info("|   Training complete — model ready for serving    |")
+    log.info("==================================================")
 
 
 if __name__ == "__main__":
