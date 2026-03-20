@@ -63,7 +63,16 @@ async def generate_smart_ai_message(
     Falls back to `generate_ai_message` if the LLM fails or API key is absent.
     """
     api_key = settings.gemini_api_key
-    if not api_key or mode == "rules_only":
+    risk_level = stats.get("risk_level", "medium")
+
+    # -------------------------------------------------------------
+    # 🎯 ARCHITECTURE ALIGNMENT: The Hybrid Flow
+    # -------------------------------------------------------------
+    # Rule D --> |Within Safety| F[End Flow/Local Generation]
+    # Rule D --> |Above Budget| E[Send to Gemini AI]
+    # -------------------------------------------------------------
+    if not api_key or mode == "rules_only" or risk_level != "high":
+        # Bypass LLM: User is safe/medium risk, generate instant local math message
         return generate_ai_message(nickname, currency, stats, mode)
 
     name = nickname or "friend"
