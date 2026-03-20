@@ -34,10 +34,10 @@ Wallet Frontend
                                   • Kaggle financial datasets (8 datasets)
                                   • Synthetic ASEAN youth data
                                                            
-  2. Rules Service  15th/65% Business Rule
+  2. Rules Service  Adaptive AI Risk Engine
      (app/services/rules.py)
                                                            
-  3. Messaging Service  Deterministic Rules Engine
+  3. Messaging Service  Adaptive Regex Engine
      (app/services/messaging_service.py) No PII sent. Runs entirely offline.
                                                            
   4. Response assembled & returned to frontend             
@@ -48,7 +48,7 @@ Wallet Frontend
 
 In addition to the core ML predictor, ByteWallet AI implements a 5-phase intelligence upgrade:
 
-1. **Phase 1: Local Hybrid Architecture (ML + Ollama Voice)** — Automatically routes high-risk findings from the Custom ML model to a local **Ollama** instance to generate 100% private, human-readable coaching tips.
+1. **Phase 1: Local Hybrid Architecture (ML + Ollama Voice)** — Automatically routes high-risk findings from the Custom ML model to a local **Ollama** instance. Includes an **Adaptive Regex Engine** (10s fallback) for hyper-personalized coaching without an LLM.
 2. **Phase 2: RAG on Transactions** — Uses a local ChromaDB vector store to embed user transaction history, providing personalized context to the generative engine.
 3. **Phase 3: Hyper-Granular Enrichment** — Enriches raw transactions with temporal (payday week), spatial (CBD buckets), and behavioral (impulse score, recurrence) features for both RAG and ML.
 4. **Phase 4: Proactive Multi-Agent Reasoning** — An orchestration layer running Subscription, Anomaly, and Savings agents in parallel during every `/predict-burn-rate` call to emit actionable warnings.

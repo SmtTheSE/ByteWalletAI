@@ -9,8 +9,8 @@ This document serves as the internal technical specification and honest assessme
 
 Most digital wallets in Southeast Asia are **retrospective**—they show you pie charts of money you have *already* spent. 
 
-**ByteWallet AI is prospective.** 
-I designed this engine to predict a user's financial future before the end of the month arrives. If a user is going to fall short of their rent or exceed their monthly budget, the AI intercepts their current trajectory, calculates the probability of a shortfall, and delivers a
+**ByteWallet AI is prospective and adaptive.** 
+I designed this engine to predict a user's financial future before the end of the month arrives. Unlike static "budget alerts," ByteWallet AI adapts to each user's unique balance and usage velocity. If a user is going to fall short of their rent or exceed their specific monthly budget, the AI intercepts their current trajectory, calculates the probability of a shortfall, and delivers a
 surgically precise, personalized instruction to fix it (e.g., "Cut your Food spending by 20% this week").
 
 ---
@@ -111,9 +111,9 @@ In the second iteration of ByteWallet AI, I successfully integrated 5 new layers
 1. **Phase 1: Local Hybrid Architecture (ML + Ollama Voice)**
    Instead of just viewing dashboards, users now benefit from a true **Local Hybrid System**. 
    - **The Engine:** The custom-trained Gradient Boosting model evaluates the user's spending first, incorporating internal **Projected Income** detection to accurately determine the month-end balance.
-   - **The Smart Voice:** If the user is *High Risk*, the backend passes the financial findings to a local **Ollama LLM** (using `qwen2.5` for speed). If Ollama is unavailable, the **Dynamic Numerical Engine** takes over, providing precise shortfall calculations based on current velocity and upcoming bills.
+   - **The Smart Voice:** If the user is *High Risk*, the backend passes the financial findings to a local **Ollama LLM** (using `qwen2.5` for speed with a 10s fallback). If Ollama is unavailable, the **Adaptive Regex Engine** takes over, identifying specific patterns (Cafes, Rideshares, Shopping) to provide hyper-personalized coaching instantly.
+   - **Adaptive Alerts:** Risk thresholds are purely dynamic, adapting to each user's unique cashflow and predicted shortfall probability.
    - **Privacy First:** All analysis is performed offline. No financial data leaves the user's hardware.
-    -   **Privacy First:** All analysis is performed offline. No financial data leaves the user's hardware.
 
 2. **Phase 2: RAG on Transaction Memory**
    I implemented a local **ChromaDB Vector Store** that embeds every transaction a user makes. When a user asks a question, the AI retrieves semantically similar past transactions to use as context, giving the AI a true "personal memory" of the user's spending habits.

@@ -15,7 +15,7 @@ The ByteWallet AI system is designed to act as an independent Microservice. It s
 4.  **Action (The Hybrid Engine):**
     -   **Math First:** The ByteWallet custom ML model instantly calculates the shortfall probability and risk level.
     -   **Safe Route:** If the user is "Within Safety" (Low/Medium Risk), the API skips LLM processing entirely and instantly returns a local, rule-based success message (saving latency and API costs).
-    -   **Ollama Route:** If the user is "Above Budget" (High Risk), the API passes the exact math findings to the local **Ollama LLM** (running on your Mac) to generate a hyper-personalized, 2-sentence actionable warning.
+    -   **Ollama Route:** If the user is "Above Budget" (High Risk), the API passes the findings to the local **Ollama LLM** (using `qwen2.5` with a 10s fast-fallback). If Ollama is unavailable, the **Adaptive Regex Engine** takes over, identifying specific patterns (e.g., Cafes, Rideshares, Shopping) to generate a hyper-personalized, 2-sentence actionable warning instantly.
 5.  **Persist:** The Edge Function saves these results into the Supabase `notifications` and `users` tables.
 6.  **Display:** The React Native frontend listens to Supabase Realtime to display Toasts, Badges, and Insights.
 
