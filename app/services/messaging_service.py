@@ -6,6 +6,7 @@ Produces a short, youth-friendly financial coaching message (max ~50 words).
 
 All data is handled locally via deterministic math rules.
 """
+import asyncio
 import logging
 from typing import Tuple
 
@@ -103,7 +104,9 @@ async def generate_smart_ai_message(
 
     try:
         client = genai.Client(api_key=api_key)
-        response = await client.aio.models.generate_content(
+        # Use synchronous method inside a thread to bypass the `aiohttp` DNS bug in the SDK
+        response = await asyncio.to_thread(
+            client.models.generate_content,
             model="gemini-2.0-flash",
             contents=prompt,
         )
