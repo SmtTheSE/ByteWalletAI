@@ -61,17 +61,32 @@ def determine_risk_level(
 ) -> str:
     """
     Combine ML probability + overshoot % + rule flags into a final risk level.
+    This logic is now ADAPTIVE: It prioritizes the AI's probabilistic assessment
+    over fixed business rules, adjusting for the user's unique usage.
 
     Returns: "low" | "medium" | "high"
     """
-    if shortfall_prob > 0.75 or budget_overshoot_percent > 0.30:
+    # 1. Primary AI Driven Assessment (Dynamic)
+    # ----------------------------------------
+    # High Risk: Extreme probability or massive predicted overshoot
+    if shortfall_prob > 0.85 or budget_overshoot_percent > 0.50:
         return "high"
-    if shortfall_prob > 0.45 or budget_overshoot_percent > 0.15:
-        # Elevate from medium to high if the 15th/65% rule fires
+    
+    # High Risk: High probability or significant predicted overshoot
+    if shortfall_prob > 0.70 or budget_overshoot_percent > 0.25:
+        return "high"
+
+    # Medium Risk: Moderate indicators
+    if shortfall_prob > 0.40 or budget_overshoot_percent > 0.10:
+        # If the static rule also fires, it reinforces the AI's concern
         if rule_result.hit_15th_65_percent_rule:
             return "high"
         return "medium"
-    # Low baseline — but warn if rule fires
+
+    # 2. Heuristic Edge Cases
+    # ------------------------
+    # If the AI says 'Low' but the fixed rule says 'Warning', we nudge it to Medium
     if rule_result.hit_15th_65_percent_rule:
         return "medium"
+
     return "low"

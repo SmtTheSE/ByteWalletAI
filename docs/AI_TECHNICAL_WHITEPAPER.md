@@ -40,6 +40,7 @@ Instead, I process the exact dollar amounts using deterministic math (Daily Burn
 * **Total Training Data**: 662,268 transaction rows.
 * **Unique Monthly Snapshots Evaluated**: 133,462 user-months.
 * **Class Balance**: 50% Safe / 50% Shortfall (Balanced explicitly for training).
+* **Adaptive Triggering**: The engine adapts to each user's specific balance and usage patterns. While an "early month / high budget" heuristic (15th/65%) is used as a baseline, the production system prioritizes **probabilistic behavior analysis** and **real-time shortfall math** unique to each user's reality.
 
 ### Honest Test Set Metrics (5-Fold Stratified Cross-Validation):
 | Metric | Score | Honest Interpretation |
