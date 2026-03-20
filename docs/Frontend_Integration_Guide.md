@@ -12,7 +12,10 @@ The ByteWallet AI system is designed to act as an independent Microservice. It s
 1. **Trigger:** A cron job or user action triggers a Supabase Edge Function.
 2. **Fetch:** The Edge Function queries Supabase (PostgreSQL) to assemble the user's financial snapshot.
 3. **Analyze:** The Edge Function sends an HTTP POST request containing the snapshot to the ByteWallet AI Service (`/v1/predict-burn-rate`).
-4. **Action:** The AI service returns a risk analysis, mathematical projections, a customized coaching message, and an array of proactive alerts.
+4. **Action (The Hybrid Engine):** 
+   - **Math First:** The ByteWallet custom ML model instantly calculates the shortfall probability and risk level.
+   - **Safe Route:** If the user is "Within Safety" (Low/Medium Risk), the API skips LLM processing entirely and instantly returns a local, rule-based success message (saving latency and API costs).
+   - **Gemini Route:** If the user is "Above Budget" (High Risk), the API passes the exact math findings to the Gemini LLM to generate a hyper-personalized, 2-sentence actionable warning.
 5. **Persist:** The Edge Function saves these results into the Supabase `notifications` and `users` tables.
 6. **Display:** The React Native frontend listens to Supabase Realtime to display Toasts, Badges, and Insights.
 
