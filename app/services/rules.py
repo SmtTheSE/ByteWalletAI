@@ -58,34 +58,41 @@ def determine_risk_level(
     shortfall_prob: float,
     budget_overshoot_percent: float,
     rule_result: RuleResult,
+    predicted_balance: float = 0.0,
 ) -> str:
     """
     Combine ML probability + overshoot % + rule flags into a final risk level.
-    This logic is now ADAPTIVE: It prioritizes the AI's probabilistic assessment
-    over fixed business rules, adjusting for the user's unique usage.
-
-    Returns: "low" | "medium" | "high"
+    This logic is TRULY ADAPTIVE: It prioritizes Real-World Math (Projected Balance)
+    to decide if a user is truly safe, regardless of what the probabilistic ML thinks.
     """
-    # 1. Primary AI Driven Assessment (Dynamic)
+    # 1. Real-World Math Override (Individual Reality)
+    # -----------------------------------------------
+    # If the user is projected to have a SIGNIFICANT surplus (> 500k VND) 
+    # and they aren't massive overshooting their budget, they are SAFE.
+    if predicted_balance > 500000 and budget_overshoot_percent < 0.20:
+        return "low"
+    
+    # If they are just barely safe (> 0), call it Medium to be cautious
+    if predicted_balance > 0:
+        return "medium"
+
+    # 2. AI Driven Assessment (Dynamic Pacing)
     # ----------------------------------------
-    # High Risk: Extreme probability or massive predicted overshoot
     if shortfall_prob > 0.85 or budget_overshoot_percent > 0.50:
         return "high"
     
-    # High Risk: High probability or significant predicted overshoot
     if shortfall_prob > 0.70 or budget_overshoot_percent > 0.25:
         return "high"
 
     # Medium Risk: Moderate indicators
     if shortfall_prob > 0.40 or budget_overshoot_percent > 0.10:
-        # If the static rule also fires, it reinforces the AI's concern
+        # Static rule reinforcement
         if rule_result.hit_15th_65_percent_rule:
             return "high"
         return "medium"
 
-    # 2. Heuristic Edge Cases
+    # 3. Heuristic Edge Cases
     # ------------------------
-    # If the AI says 'Low' but the fixed rule says 'Warning', we nudge it to Medium
     if rule_result.hit_15th_65_percent_rule:
         return "medium"
 

@@ -53,11 +53,12 @@ async def predict_burn_rate(payload: PredictBurnRateRequest):
         budget_total  = stats["budget_total"],
     )
 
-    #  4. Final risk level 
+    #  4. Final risk level (Adaptive Math + Rules)
     risk_level = rules.determine_risk_level(
         shortfall_prob           = stats["shortfall_prob"],
         budget_overshoot_percent = stats["budget_overshoot_percent"],
         rule_result              = rule_result,
+        predicted_balance        = stats["predicted_month_end_balance"],
     )
     stats["risk_level"]   = risk_level
     stats["trigger_rule"] = rule_result.trigger_rule
