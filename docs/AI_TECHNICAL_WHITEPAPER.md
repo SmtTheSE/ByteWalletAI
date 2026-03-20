@@ -107,10 +107,10 @@ Because the API I built computes this snapshot instantly, ByteWallet can produce
 
 In the second iteration of ByteWallet AI, I successfully integrated 5 new layers of advanced intelligence on top of the core Scikit-Learn predictor.
 
-1. **Phase 1: Hybrid Architecture (Main ML + Gemini LLM Fallback)**
-   Instead of just viewing dashboards, users now benefit from a true **Hybrid System**. 
+1. **Phase 1: Local Hybrid Architecture (ML + Ollama Voice)**
+   Instead of just viewing dashboards, users now benefit from a true **Local Hybrid System**. 
    - **The Engine:** The custom-trained Gradient Boosting model evaluates the user's spending first. 
-   - **The Action:** If the user is *Within Safety*, the backend instantly generates a local rule-based response. If the user is *Above Budget* (High Risk), the backend passes the exact mathematical findings to the **Gemini 2.0 LLM**. Gemini acts strictly as a "personalized mouthpiece," forced to output a human-understandable, 2-sentence actionable warning based solely on strict ML mathematical facts, completely preventing AI hallucinations.
+   - **The Voice:** If the user is *Above Budget* (High Risk), the backend passes the financial findings to a local **Ollama LLM** (e.g. Llama 3.2). Ollama acts strictly as a "personalized mouthpiece," forced to output a human-understandable actionable warning based on ML mathematical facts. This setup is 100% private and zero-cost, with no external API dependency or quota limits.
 
 2. **Phase 2: RAG on Transaction Memory**
    I implemented a local **ChromaDB Vector Store** that embeds every transaction a user makes. When a user asks a question, the AI retrieves semantically similar past transactions to use as context, giving the AI a true "personal memory" of the user's spending habits.

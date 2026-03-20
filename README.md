@@ -10,13 +10,7 @@ ByteWallet AI exposes a hybrid API with both predictive math and generative AI:
 ```
 POST /v1/predict-burn-rate
 ```
-The original endpoint. Sends current state, returns `risk_level`, numeric projections, and a deterministic coach message.
-*Now enhanced with Phase 4 Proactive Agents (Subscription, Anomaly, Savings).*
-
-```
-POST /v1/chat
-```
-**Phase 1 & 2 NL Function Calling (Gemini) + RAG:** The user asks free-form financial questions. The LLM retrieves personal transaction history (ChromaDB) and dynamically calls wallet APIs to ground its answer in real math.
+The core hybrid endpoint. Combines **Custom ML Inference** with **Local LLM (Ollama)** voice generation. Calculates `risk_level`, numeric projections, and a hyper-personalized coaching message completely offline.
 
 ```
 POST /v1/federated/submit-update
@@ -54,8 +48,8 @@ Wallet Frontend
 
 In addition to the core ML predictor, ByteWallet AI implements a 5-phase intelligence upgrade:
 
-1. **Phase 1: NL Function Calling (Chat API)** — Uses Google Gemini to dynamically orchestrate wallet APIs (balance, affordability checks) to answer natural language queries.
-2. **Phase 2: RAG on Transactions** — Uses a local ChromaDB vector store to embed user transaction history, providing personalized semantic context to the LLM.
+1. **Phase 1: Local Hybrid Architecture (ML + Ollama Voice)** — Automatically routes high-risk findings from the Custom ML model to a local **Ollama** instance to generate 100% private, human-readable coaching tips.
+2. **Phase 2: RAG on Transactions** — Uses a local ChromaDB vector store to embed user transaction history, providing personalized context to the generative engine.
 3. **Phase 3: Hyper-Granular Enrichment** — Enriches raw transactions with temporal (payday week), spatial (CBD buckets), and behavioral (impulse score, recurrence) features for both RAG and ML.
 4. **Phase 4: Proactive Multi-Agent Reasoning** — An orchestration layer running Subscription, Anomaly, and Savings agents in parallel during every `/predict-burn-rate` call to emit actionable warnings.
 5. **Phase 5: Federated Learning (Edge AI)** — A `FedAvg` local server combined with a client simulator that trains the models on-device and transmits only mathematical weight deltas to protect privacy.

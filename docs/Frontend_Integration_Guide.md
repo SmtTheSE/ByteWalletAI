@@ -9,15 +9,15 @@
 
 The ByteWallet AI system is designed to act as an independent Microservice. It should not directly access the Supabase PostgreSQL database. Instead, your existing Supabase Edge Functions act as the orchestration layer:
 
-1. **Trigger:** A cron job or user action triggers a Supabase Edge Function.
-2. **Fetch:** The Edge Function queries Supabase (PostgreSQL) to assemble the user's financial snapshot.
-3. **Analyze:** The Edge Function sends an HTTP POST request containing the snapshot to the ByteWallet AI Service (`/v1/predict-burn-rate`).
-4. **Action (The Hybrid Engine):** 
-   - **Math First:** The ByteWallet custom ML model instantly calculates the shortfall probability and risk level.
-   - **Safe Route:** If the user is "Within Safety" (Low/Medium Risk), the API skips LLM processing entirely and instantly returns a local, rule-based success message (saving latency and API costs).
-   - **Gemini Route:** If the user is "Above Budget" (High Risk), the API passes the exact math findings to the Gemini LLM to generate a hyper-personalized, 2-sentence actionable warning.
-5. **Persist:** The Edge Function saves these results into the Supabase `notifications` and `users` tables.
-6. **Display:** The React Native frontend listens to Supabase Realtime to display Toasts, Badges, and Insights.
+1.  **Trigger:** A cron job or user action triggers a Supabase Edge Function.
+2.  **Fetch:** The Edge Function queries Supabase (PostgreSQL) to assemble the user's financial snapshot.
+3.  **Analyze:** The Edge Function sends an HTTP POST request containing the snapshot to the ByteWallet AI Service (`/v1/predict-burn-rate`).
+4.  **Action (The Hybrid Engine):**
+    -   **Math First:** The ByteWallet custom ML model instantly calculates the shortfall probability and risk level.
+    -   **Safe Route:** If the user is "Within Safety" (Low/Medium Risk), the API skips LLM processing entirely and instantly returns a local, rule-based success message (saving latency and API costs).
+    -   **Ollama Route:** If the user is "Above Budget" (High Risk), the API passes the exact math findings to the local **Ollama LLM** (running on your Mac) to generate a hyper-personalized, 2-sentence actionable warning.
+5.  **Persist:** The Edge Function saves these results into the Supabase `notifications` and `users` tables.
+6.  **Display:** The React Native frontend listens to Supabase Realtime to display Toasts, Badges, and Insights.
 
 ---
 
@@ -183,44 +183,7 @@ const RiskBadge = ({ riskLevel }) => {
 }
 ```
 
-### 3.3 Natural Language Assistant (Chat UI)
-
-For Phase 1 (NL Function Calling), you will send queries directly to the Edge Function (or proxy through it to the AI Service) so the LLM gets the latest sandbox snapshot.
-
-**API Route to call:** `POST /v1/chat`
-
-**Expected Payload:**
-```json
-{
-  "user_id": "uuid-here",
-  "question": "Can I afford to buy a new laptop for 10 million VND next week?",
-  "balances": { ... },
-  "monthly_budget": { ... },
-  "transactions": [ ... ]
-}
-```
-
-**Response Handling:**
-```javascript
-const sendChatQuery = async (userGist, text) => {
-  setLoading(true);
-  try {
-    // Send entire user financial context plus the question
-    const res = await api.post('/v1/chat', {
-       ...userGist, // balances, transactions, etc.
-       question: text
-    });
-    
-    appendMessage({ role: 'ai', text: res.data.answer });
-  } catch (e) {
-    appendMessage({ role: 'ai', text: 'Sorry, I am having trouble connecting to the financial engine.' });
-  } finally {
-    setLoading(false);
-  }
-};
-```
-
----
+#---
 
 ## 4. Key Considerations for the Frontend Developer
 

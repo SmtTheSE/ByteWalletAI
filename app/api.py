@@ -13,10 +13,9 @@ from fastapi import APIRouter
 
 from app.schemas import (
     PredictBurnRateRequest, PredictBurnRateResponse, RiskyCategory, TriggerRuleFlags,
-    ChatRequest, ChatResponse, ProactiveAlert,
+    ProactiveAlert,
 )
 from app.services import ml_service, rules, messaging_service
-from app.services.chat_service import answer_user_question
 from app.services.agent_runner import run_all_agents
 from app.config import settings
 
@@ -104,48 +103,6 @@ async def predict_burn_rate(payload: PredictBurnRateRequest):
         ai_mode_used                 = ai_mode_used,
         proactive_alerts             = [ProactiveAlert(**a) for a in run_all_agents(payload.user_id, snapshot)],
         generated_at                 = datetime.now(timezone.utc),
-    )
-
-
-#  Phase 1: Natural Language Chat 
-
-@router.post("/v1/chat", response_model=ChatResponse, tags=["chat"])
-async def chat(
-    payload: ChatRequest,
-) -> ChatResponse:
-    """
-    Answer a free-form financial question using Gemini with live wallet tools.
-
-    The LLM dynamically selects and calls wallet functions (get_wallet_balance,
-    can_afford, get_predicted_burn_rate, etc.) to produce a data-grounded answer.
-    Transaction history is indexed into ChromaDB and retrieved as RAG context.
-
-    If GEMINI_API_KEY is not set, returns a deterministic rule-based answer.
-    """
-    snapshot = payload.model_dump()
-
-    # Phase 2: Index transactions and retrieve RAG context
-    from app.services.rag_service import index_and_retrieve
-    rag_context = await index_and_retrieve(
-        user_id=payload.user_id,
-        transactions=snapshot.get("transactions", []),
-        question=payload.question,
-    )
-
-    answer, tools_used = await answer_user_question(
-        question=payload.question,
-        snapshot=snapshot,
-        rag_context=rag_context,
-    )
-
-
-    return ChatResponse(
-        user_id=payload.user_id,
-        question=payload.question,
-        answer=answer,
-        tools_used=tools_used,
-        fallback_mode=len(tools_used) == 0,
-        generated_at=datetime.now(timezone.utc),
     )
 
 
