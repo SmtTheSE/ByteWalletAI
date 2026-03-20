@@ -36,11 +36,41 @@ Since LLMs are heavy, running them on a free cloud tier is slow. We recommended 
 
 ---
 
-## 4. Verification
-Once deployed, your API will be live at `https://bytewallet-ai.onrender.com`.
-Test it with a simple health check:
+## 5. Manual Deployment (No Blueprint)
+If you prefer to set up ByteWallet AI manually, follow these steps:
+
+### Step 1: Create a New Web Service
+1.  In the Render Dashboard, click **New +** > **Web Service**.
+2.  Connect your GitHub repository.
+3.  **Name**: `bytewallet-ai`
+4.  **Runtime**: `Docker`
+
+### Step 2: Set Environment Variables
+Go to the **Environment** tab and add:
+| Key | Value |
+| :--- | :--- |
+| `OLLAMA_BASE_URL` | *Your Ngrok URL (e.g. https://...)* |
+| `OLLAMA_MODEL` | `qwen2.5:latest` |
+| `PORT` | `8000` |
+
+### Step 3: Deploy
+Click **Create Web Service**. Render will build the image from your `Dockerfile` and go live.
+
+---
+
+## 6. Raw Docker Deployment (Local or VPS)
+To run the production container manually on any machine:
 ```bash
-curl https://bytewallet-ai.onrender.com/
+# 1. Build the image
+docker build -t bytewallet-ai:latest .
+
+# 2. Run the container
+docker run -d \
+  -p 8000:8000 \
+  -e OLLAMA_BASE_URL="http://host.docker.internal:11434" \
+  bytewallet-ai:latest
 ```
+
+---
 
 **ByteWallet AI is now live in the cloud!** 🌍🛰️
