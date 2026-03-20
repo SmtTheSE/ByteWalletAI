@@ -189,6 +189,10 @@ bytewallet_ai/
     friends_rows.csv         # Real ByteWallet friends
     kaggle/                  # Auto-downloaded Kaggle datasets
   models/                    # Saved model artifacts
+  docs/
+    AI_TECHNICAL_WHITEPAPER.md     # Deep dive into ML metrics & architecture
+    ByteWallet_AI_Proposal.docx    # Official grant proposal
+    Frontend_Integration_Guide.md  # How to consume the API & Webhooks
   tests/
     test_api.py              # API integration tests
     test_ml.py               # ML unit tests
