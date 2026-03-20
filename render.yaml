@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: bytewallet-ai
+    runtime: docker
+    plan: free # Can be upgraded to 'starter' for more RAM
+    region: singapore # Closest to ASEAN users
+    envVars:
+      - key: OLLAMA_BASE_URL
+        value: "http://host.docker.internal:11434" # Default for local, override in Render dashboard for production
+      - key: OLLAMA_MODEL
+        value: "qwen2.5:latest"
+      - key: LOG_LEVEL
+        value: "info"
+      - key: PORT
+        value: "8000"
+    healthCheckPath: /

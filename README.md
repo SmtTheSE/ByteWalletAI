@@ -56,7 +56,12 @@ In addition to the core ML predictor, ByteWallet AI implements a 5-phase intelli
 
 ---
 
-## Quick Start
+## 🚀 One-Click Cloud Deployment
+ByteWallet AI is pre-configured for **Render**. Use the `render.yaml` file to deploy as a Blueprint. See [DEPLOYMENT_GUIDE_RENDER.md](file:///Users/sittminthar/Desktop/AI%20YOUTH%20INC/bytewallet_ai/docs/DEPLOYMENT_GUIDE_RENDER.md) for details.
+
+---
+
+## 🛠️ Local Installation
 
 ### 1. Install dependencies
 
