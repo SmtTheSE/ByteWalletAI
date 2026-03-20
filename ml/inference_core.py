@@ -41,7 +41,7 @@ def _load_model():
     if MODEL_PATH.exists():
         try:
             _model = joblib.load(MODEL_PATH)
-            log.info(f"✅ Model loaded from {MODEL_PATH}")
+            log.info(f" Model loaded from {MODEL_PATH}")
         except Exception as e:
             log.warning(f"Failed to load model: {e}")
             _model = None
@@ -80,7 +80,7 @@ def predict_burn_risk_from_snapshot(snapshot: dict) -> dict:
     from datetime import datetime
     import calendar
 
-    # ── Parse input ──────────────────────────────────────────────────────────
+    #  Parse input 
     current_date  = pd.to_datetime(snapshot.get("current_date", datetime.now(timezone.utc).date()))
     day           = current_date.day
     month         = current_date.month
@@ -139,7 +139,7 @@ def predict_burn_risk_from_snapshot(snapshot: dict) -> dict:
     spend_mtd = float(exp_mtd["amount"].sum())
     income_mtd = float(inc_mtd["amount"].sum())
 
-    # ── Feature vector and model prediction ──────────────────────────────────
+    #  Feature vector and model prediction 
     try:
         feature_df = build_inference_features(snapshot)
         model = _load_model()
@@ -159,14 +159,14 @@ def predict_burn_risk_from_snapshot(snapshot: dict) -> dict:
         shortfall_prob = _rule_based_shortfall_prob(progress, budget_used_pct, delta)
         model_used = False
 
-    # ── Projections ───────────────────────────────────────────────────────────
+    #  Projections 
     avg_daily_spend = spend_mtd / max(day, 1)
     predicted_total_spend    = avg_daily_spend * days_in_month
     predicted_month_end_balance = total_balance - (predicted_total_spend - spend_mtd) - essential_total
     budget_overshoot_amount  = max(predicted_total_spend - budget_total, 0.0)
     budget_overshoot_percent = budget_overshoot_amount / max(budget_total, 1.0)
 
-    # ── Top risky categories ──────────────────────────────────────────────────
+    #  Top risky categories 
     top_risky = []
     if len(exp_mtd) > 0:
         cat_spend = exp_mtd.groupby("category")["amount"].sum().sort_values(ascending=False)
@@ -183,7 +183,7 @@ def predict_burn_risk_from_snapshot(snapshot: dict) -> dict:
                 "projected_spent":       float(projected_cat),
             })
 
-    # ── Risk level ────────────────────────────────────────────────────────────
+    #  Risk level 
     if shortfall_prob > 0.75 or budget_overshoot_percent > 0.30:
         risk_level = "high"
     elif shortfall_prob > 0.45 or budget_overshoot_percent > 0.15:

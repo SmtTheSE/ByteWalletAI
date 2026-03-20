@@ -84,11 +84,11 @@ def download_all(force: bool = False):
                 quiet=False,
             )
             csvs = list(dest.glob("*.csv"))
-            print(f"  ✓ Done — {len(csvs)} CSV file(s): {[c.name for c in csvs]}")
+            print(f"   Done — {len(csvs)} CSV file(s): {[c.name for c in csvs]}")
         except Exception as e:
-            print(f"  ✗ Failed to download {slug}: {e}")
+            print(f"   Failed to download {slug}: {e}")
 
-    print("\n✅ All downloads complete. Files in:", KAGGLE_BASE)
+    print("\n All downloads complete. Files in:", KAGGLE_BASE)
 
 
 if __name__ == "__main__":

@@ -17,7 +17,7 @@ from ml.features import build_inference_features, FEATURE_COLUMNS
 from ml.inference_core import predict_burn_risk_from_snapshot
 
 
-# ─── Labeler tests ────────────────────────────────────────────────────────────
+#  Labeler tests 
 
 def _make_tx(user_id, year_month, amount, tx_type, day=15):
     return {"user_id": user_id, "year_month": year_month,
@@ -67,7 +67,7 @@ def test_label_no_shortfall():
     assert april["shortfall_event"].values[0] == 0
 
 
-# ─── Feature engineering tests ───────────────────────────────────────────────
+#  Feature engineering tests 
 
 def test_inference_features_shape():
     """build_inference_features must return a single-row df with all feature columns."""
@@ -102,7 +102,7 @@ def test_inference_features_progress():
     assert df["progress"].values[0] == pytest.approx(expected, abs=0.01)
 
 
-# ─── Inference core tests ─────────────────────────────────────────────────────
+#  Inference core tests 
 
 def test_predict_high_risk():
     """High daily spend in first half → high or medium risk."""

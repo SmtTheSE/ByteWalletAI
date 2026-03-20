@@ -16,7 +16,7 @@ from app.main import app
 client = TestClient(app)
 
 
-# ─── Fixtures ────────────────────────────────────────────────────────────────
+#  Fixtures 
 
 def _high_risk_payload():
     """User has used 72% of budget by day 14 (first half of month)."""
@@ -71,7 +71,7 @@ def _low_risk_payload():
     }
 
 
-# ─── Tests ───────────────────────────────────────────────────────────────────
+#  Tests 
 
 def test_health():
     res = client.get("/health")

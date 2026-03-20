@@ -100,3 +100,27 @@ Because the API I built computes this snapshot instantly, ByteWallet can produce
    When the user opens the "Shopping" tab to make a transfer to Shopee/Lazada, pop up an interception modal: *"Wait! Your `delta_spend_rate` is 15% higher than usual. If you buy this, your risk of breaking budget jumps to High."*
 4. **"Safe To Spend" Metric**: 
    Instead of viewing "Total Balance" (which gives a false sense of security), show the user "Safe Amount to Spend Today" calculated directly from the remaining non-allocated budget divided by remaining days.
+
+---
+
+## 6. Advanced Intelligence Upgrades (V2)
+
+In the second iteration of ByteWallet AI, I successfully integrated 5 new layers of advanced intelligence on top of the core Scikit-Learn predictor.
+
+1. **Phase 1: NL Function Calling (Gemini integration)**
+   Instead of just viewing dashboards, users can now open a chat and ask: *"Can I afford BlackPink tickets next week?"* The Gemini LLM dynamically selects and executes live Python functions (`get_wallet_balance`, `can_afford`) against the user's real-time financial snapshot to ground its answer mathematically, eliminating AI hallucinations.
+
+2. **Phase 2: RAG on Transaction Memory**
+   I implemented a local **ChromaDB Vector Store** that embeds every transaction a user makes. When a user asks a question, the AI retrieves semantically similar past transactions to use as context, giving the AI a true "personal memory" of the user's spending habits.
+
+3. **Phase 3: Hyper-Granular Data Enrichment**
+   Raw transactions (e.g., "$15 at Starbucks") are now fed through an enrichment pipeline that tags them with geographical CBD buckets, time-of-day impulse scoring (e.g., late-night weekend purchases), and recurrence detection (for hidden subscriptions).
+
+4. **Phase 4: Multi-Agent Reasoning (Proactive Alerts)**
+   I built an orchestration layer running three independent AI agents in the background during every API call:
+   * **Subscription Agent:** Detects silent price hikes in recurring charges.
+   * **Anomaly Agent:** Flags statistical outliers (>$2.5\sigma$) and duplicate charges.
+   * **Savings Agent:** Paces the user and nudges them to transfer to savings when idle cash accumulates.
+
+5. **Phase 5: Federated Learning Foundation (Edge AI Privacy)**
+   I built a `FedAvg` local server combined with a client simulator. This demonstrates how ByteWallet AI can learn from the collective intelligence of all its users without raw financial data ever leaving their mobile devices. The devices train the model locally for 1 epoch and transmit only the mathematical *weight deltas* back to the central server.

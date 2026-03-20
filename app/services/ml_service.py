@@ -19,7 +19,7 @@ def preload_model():
             "To train the model run:  python -m ml.train_model"
         )
     else:
-        log.info("ML model loaded successfully ✓")
+        log.info("ML model loaded successfully ")
 
 
 def run_prediction(snapshot: dict) -> dict:

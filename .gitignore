@@ -16,10 +16,11 @@ env/
 # (Ignored to save 500MB+ payload. Real data CSV rows remain for context)
 data/kaggle/
 
-# Pytest / Logs / Sandbox
+# Pytest / Logs / Sandbox / Local DB
 .pytest_cache/
 server.log
 response.json
+.chroma_db/
 
 # OS generated files
 .DS_Store

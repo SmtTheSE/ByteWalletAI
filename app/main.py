@@ -24,11 +24,11 @@ log = logging.getLogger("main")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup: load ML model into memory."""
-    log.info("═══ ByteWallet AI  —  starting up ═══")
+    log.info(" ByteWallet AI  —  starting up ")
     preload_model()
-    log.info("Server ready ✅")
+    log.info("Server ready ")
     yield
-    log.info("═══ ByteWallet AI  —  shutting down ═══")
+    log.info(" ByteWallet AI  —  shutting down ")
 
 
 app = FastAPI(
@@ -41,7 +41,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# ── CORS — allow wallet frontend (all origins) ────────────────────────────────
+#  CORS — allow wallet frontend (all origins) 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

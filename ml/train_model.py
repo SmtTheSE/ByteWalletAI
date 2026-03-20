@@ -65,9 +65,9 @@ from ml.labeler          import build_labelled_dataset, compute_monthly_totals
 from ml.features         import build_training_features, FEATURE_COLUMNS
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 # Synthetic ASEAN youth data generator
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 
 def generate_asean_synthetic(n_users: int = 200, months_per_user: int = 6) -> pd.DataFrame:
     """
@@ -147,9 +147,9 @@ def generate_asean_synthetic(n_users: int = 200, months_per_user: int = 6) -> pd
     return pd.DataFrame(records)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 # Kaggle → transaction row adapter
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 
 def adapt_kaggle_to_tx(kaggle_df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -167,9 +167,9 @@ def adapt_kaggle_to_tx(kaggle_df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 # Balance classes via oversampling minority
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 
 def balance_classes(X: pd.DataFrame, y: pd.Series) -> tuple[pd.DataFrame, pd.Series]:
     """Oversample the minority class so training sees balanced examples."""
@@ -185,32 +185,32 @@ def balance_classes(X: pd.DataFrame, y: pd.Series) -> tuple[pd.DataFrame, pd.Ser
     return balanced.drop("__label__", axis=1), balanced["__label__"]
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 # Main training pipeline
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 
 def main() -> None:
     log.info("==================================================")
     log.info("|   ByteWallet AI — Production Model Training      |")
     log.info("==================================================")
 
-    # ── 1. Load real data ─────────────────────────────────────────────────────
+    #  1. Load real data 
     log.info("\n[1/6] Loading real ByteWallet data…")
     real_tx = load_transactions()
     log.info(f"      Real rows: {len(real_tx):,}  |  types: {real_tx['type'].value_counts().to_dict()}")
 
-    # ── 2. Load Kaggle data ───────────────────────────────────────────────────
+    #  2. Load Kaggle data 
     log.info("\n[2/6] Loading Kaggle datasets…")
     kaggle_unified = load_all_kaggle()
     kaggle_tx      = adapt_kaggle_to_tx(kaggle_unified)
     log.info(f"      Kaggle rows: {len(kaggle_tx):,}")
 
-    # ── 3. Generate synthetic ASEAN data ──────────────────────────────────────
+    #  3. Generate synthetic ASEAN data 
     log.info("\n[3/6] Generating synthetic ASEAN youth data…")
     synth_tx = generate_asean_synthetic(n_users=300, months_per_user=8)
     log.info(f"      Synthetic rows: {len(synth_tx):,}")
 
-    # ── 4. Combine all sources ────────────────────────────────────────────────
+    #  4. Combine all sources 
     log.info("\n[4/6] Combining all data sources…")
     all_cols = ["user_id", "year_month", "day", "amount", "type", "category"]
 
@@ -233,7 +233,7 @@ def main() -> None:
     log.info(f"      Type dist: {all_tx['type'].value_counts().to_dict()}")
     log.info(f"      Unique users: {all_tx['user_id'].nunique():,}")
 
-    # ── 5. Build labels + features ────────────────────────────────────────────
+    #  5. Build labels + features 
     log.info("\n[5/6] Building labels and feature matrix…")
     labels   = build_labelled_dataset(all_tx)
     train_df = build_training_features(all_tx, labels, snapshot_day=15)
@@ -258,7 +258,7 @@ def main() -> None:
     X_bal, y_bal = balance_classes(X, y)
     log.info(f"      Class balance after  resampling: {y_bal.value_counts().to_dict()}")
 
-    # ── 6. Train + evaluate ───────────────────────────────────────────────────
+    #  6. Train + evaluate 
     log.info("\n[6/6] Training model…")
 
     # Train/test split (stratified)
@@ -292,7 +292,7 @@ def main() -> None:
     auc  = roc_auc_score(y_test, y_prob) if len(set(y_test)) > 1 else 0.0
     cm   = confusion_matrix(y_test, y_pred)
 
-    log.info("\n" + "─"*50)
+    log.info("\n" + ""*50)
     log.info("CLASSIFICATION REPORT:")
     log.info("\n" + classification_report(y_test, y_pred, target_names=["no_shortfall","shortfall"]))
     log.info(f"ROC-AUC:   {auc:.4f}")
@@ -311,10 +311,10 @@ def main() -> None:
     feat_imp     = sorted(zip(FEATURE_COLUMNS, importances), key=lambda x: x[1], reverse=True)
     log.info("\nTop 10 Feature Importances:")
     for feat, imp in feat_imp[:10]:
-        bar = "█" * int(imp * 40)
+        bar = "" * int(imp * 40)
         log.info(f"  {feat:<35s} {imp:.4f}  {bar}")
 
-    # ── Save artifacts ─────────────────────────────────────────────────────────
+    #  Save artifacts 
     joblib.dump(model, MODEL_PATH)
     log.info(f"\nModel saved → {MODEL_PATH}")
 

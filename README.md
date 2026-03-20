@@ -5,19 +5,23 @@
 
 ---
 
-## What This Does
-
-ByteWallet AI exposes a single HTTP API endpoint:
+ByteWallet AI exposes a hybrid API with both predictive math and generative AI:
 
 ```
 POST /v1/predict-burn-rate
 ```
+The original endpoint. Sends current state, returns `risk_level`, numeric projections, and a deterministic coach message.
+*Now enhanced with Phase 4 Proactive Agents (Subscription, Anomaly, Savings).*
 
-The wallet frontend sends a user's current financial state (balances, budget, transactions).
-The API returns:
-- **`risk_level`** — `low` / `medium` / `high`
-- **Numeric projections** — predicted spend, month-end balance, budget overshoot
-- **`ai_message`** — 2-3 sentence coaching message generated exclusively by the deterministic rules engine
+```
+POST /v1/chat
+```
+**Phase 1 & 2 NL Function Calling (Gemini) + RAG:** The user asks free-form financial questions. The LLM retrieves personal transaction history (ChromaDB) and dynamically calls wallet APIs to ground its answer in real math.
+
+```
+POST /v1/federated/submit-update
+```
+**Phase 5 Federated Learning:** On-device training simulator that submits gradient weight deltas to the central server without exposing raw transaction data.
 
 ---
 
@@ -25,26 +29,36 @@ The API returns:
 
 ```
 Wallet Frontend
-      │
-      ▼  POST /v1/predict-burn-rate
-┌─────────────────────────────────┐
-│  FastAPI App (app/)             │
-│                                 │
-│  1. ML Service  ─────────────► Custom GradientBoostingClassifier
-│     (ml/inference_core.py)       trained on:
-│                                  • Real ByteWallet CSV data (85 real txns)
-│                                  • Kaggle financial datasets (8 datasets)
-│                                  • Synthetic ASEAN youth data
-│                                                           ▼
-│  2. Rules Service ────────────► 15th/65% Business Rule
-│     (app/services/rules.py)
-│                                                           ▼
-│  3. Messaging Service ────────► Deterministic Rules Engine
-│     (app/services/messaging_service.py) No PII sent. Runs entirely offline.
-│                                                           ▼
-│  4. Response assembled & returned to frontend             │
-└─────────────────────────────────────────────────────────-─┘
+      
+        POST /v1/predict-burn-rate
+
+  FastAPI App (app/)             
+                                 
+  1. ML Service   Custom GradientBoostingClassifier
+     (ml/inference_core.py)       trained on:
+                                  • Real ByteWallet CSV data (85 real txns)
+                                  • Kaggle financial datasets (8 datasets)
+                                  • Synthetic ASEAN youth data
+                                                           
+  2. Rules Service  15th/65% Business Rule
+     (app/services/rules.py)
+                                                           
+  3. Messaging Service  Deterministic Rules Engine
+     (app/services/messaging_service.py) No PII sent. Runs entirely offline.
+                                                           
+  4. Response assembled & returned to frontend             
+-
 ```
+
+## Advanced Intelligence Architecture (Phases 1-5)
+
+In addition to the core ML predictor, ByteWallet AI implements a 5-phase intelligence upgrade:
+
+1. **Phase 1: NL Function Calling (Chat API)** — Uses Google Gemini to dynamically orchestrate wallet APIs (balance, affordability checks) to answer natural language queries.
+2. **Phase 2: RAG on Transactions** — Uses a local ChromaDB vector store to embed user transaction history, providing personalized semantic context to the LLM.
+3. **Phase 3: Hyper-Granular Enrichment** — Enriches raw transactions with temporal (payday week), spatial (CBD buckets), and behavioral (impulse score, recurrence) features for both RAG and ML.
+4. **Phase 4: Proactive Multi-Agent Reasoning** — An orchestration layer running Subscription, Anomaly, and Savings agents in parallel during every `/predict-burn-rate` call to emit actionable warnings.
+5. **Phase 5: Federated Learning (Edge AI)** — A `FedAvg` local server combined with a client simulator that trains the models on-device and transmits only mathematical weight deltas to protect privacy.
 
 ---
 

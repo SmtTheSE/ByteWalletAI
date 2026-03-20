@@ -54,9 +54,9 @@ def _cat_bucket(category: str) -> str:
     return CATEGORY_MAP.get(category, "pct_other")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 # Vectorized training feature builder
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 
 def build_training_features(
     tx_df: pd.DataFrame,
@@ -100,7 +100,7 @@ def build_training_features(
     tx_mtd = tx_mtd.copy()
     tx_mtd["cat_bucket"] = tx_mtd["category"].map(CATEGORY_MAP).fillna("pct_other")
 
-    # ── MTD expense and income aggregates ─────────────────────────────────────
+    #  MTD expense and income aggregates 
     exp = tx_mtd[tx_mtd["type"] == "expense"]
     inc = tx_mtd[tx_mtd["type"] == "income"]
     key = ["user_id", "year_month"]
@@ -108,7 +108,7 @@ def build_training_features(
     spend_mtd  = exp.groupby(key)["amount"].sum().rename("spend_mtd")
     income_mtd = inc.groupby(key)["amount"].sum().rename("income_mtd")
 
-    # ── Category shares (pivot table) ─────────────────────────────────────────
+    #  Category shares (pivot table) 
     if len(exp) > 0:
         cat_pivot = (
             exp.groupby(key + ["cat_bucket"])["amount"]
@@ -121,7 +121,7 @@ def build_training_features(
     else:
         cat_pct = pd.DataFrame(columns=CAT_FEATURES)
 
-    # ── Combine into month-level features ─────────────────────────────────────
+    #  Combine into month-level features 
     base = labels_df[["user_id","year_month","shortfall_event"]].copy()
     base = base.merge(spend_mtd,  on=key, how="left")
     base = base.merge(income_mtd, on=key, how="left")
@@ -134,7 +134,7 @@ def build_training_features(
     for col in CAT_FEATURES:
         base[col] = base[col].fillna(0)
 
-    # ── Calendar features ─────────────────────────────────────────────────────
+    #  Calendar features 
     base["_year"]  = base["year_month"].str[:4].astype(int)
     base["_month"] = base["year_month"].str[5:7].astype(int)
     base["days_in_month"] = base.apply(
@@ -143,12 +143,12 @@ def build_training_features(
     base["day_of_month"]  = snapshot_day
     base["progress"]      = (snapshot_day / base["days_in_month"]).clip(0, 1)
 
-    # ── Derived features ──────────────────────────────────────────────────────
+    #  Derived features 
     base["avg_daily_spend_mtd"] = base["spend_mtd"] / snapshot_day
     base["net_mtd"]             = base["income_mtd"] - base["spend_mtd"]
     base["cash_flow_ratio"]     = base["income_mtd"] / (base["spend_mtd"] + 1e-9)
 
-    # ── Last-3-month rolling avg daily spend (vectorized via shift) ───────────
+    #  Last-3-month rolling avg daily spend (vectorized via shift) 
     # Build monthly total expense per user
     monthly_exp = (
         tx[tx["type"] == "expense"]
@@ -175,7 +175,7 @@ def build_training_features(
     base["avg_daily_spend_last_3m"] = base["avg_daily_exp_3m"].fillna(base["avg_daily_spend_mtd"])
     base["delta_spend_rate"]        = base["avg_daily_spend_mtd"] - base["avg_daily_spend_last_3m"]
 
-    # ── Historical overspend flags (lagged labels per user) ───────────────────
+    #  Historical overspend flags (lagged labels per user) 
     lbl = labels_df[["user_id","year_month","shortfall_event"]].copy()
     lbl = lbl.sort_values(["user_id","year_month"])
     lbl["prev1"] = lbl.groupby("user_id")["shortfall_event"].shift(1).fillna(0).astype(int)
@@ -184,19 +184,19 @@ def build_training_features(
     base["prev_month_overspend"]  = base["prev1"].fillna(0).astype(int)
     base["prev2_month_overspend"] = base["prev2"].fillna(0).astype(int)
 
-    # ── Final assembly ─────────────────────────────────────────────────────────
+    #  Final assembly 
     result = base[FEATURE_COLUMNS + ["shortfall_event"]].copy()
     result = result.dropna(subset=["shortfall_event"])
     result[FEATURE_COLUMNS] = result[FEATURE_COLUMNS].fillna(0)
     result["shortfall_event"] = result["shortfall_event"].astype(int)
 
-    log.info(f"  ✅ Feature matrix: {len(result):,} rows × {len(FEATURE_COLUMNS)} features")
+    log.info(f"   Feature matrix: {len(result):,} rows × {len(FEATURE_COLUMNS)} features")
     return result.reset_index(drop=True)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 # Live inference: single-user snapshot → feature vector
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 
 def build_inference_features(snapshot: dict) -> pd.DataFrame:
     """

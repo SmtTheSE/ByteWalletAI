@@ -23,9 +23,9 @@ import pandas as pd
 log = logging.getLogger("load_kaggle")
 KAGGLE_DIR = Path(__file__).parent.parent / "data" / "kaggle"
 
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 # Internal helpers
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 
 def _find_csv(folder: str) -> Optional[Path]:
     """Return the largest CSV file in the given subfolder, or None."""
@@ -52,10 +52,10 @@ def _to_unified(df: pd.DataFrame) -> pd.DataFrame:
     return df[required].drop_duplicates().reset_index(drop=True)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 # Dataset 1: credit_card_transactions (category + amount + date, 1M+ rows)
 # Schema: trans_date_trans_time, cc_num, merchant, category, amt, is_fraud
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 
 def load_credit_transactions(max_rows: int = 200_000) -> Optional[pd.DataFrame]:
     f = _find_csv("credit_transactions")
@@ -95,10 +95,10 @@ def load_credit_transactions(max_rows: int = 200_000) -> Optional[pd.DataFrame]:
     return _to_unified(combined)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 # Dataset 2: online_fraud (PaySim mobile money - CASH_IN, CASH_OUT, etc.)
 # Schema: step, type, amount, nameOrig, oldbalanceOrg ... isFraud
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 
 def load_online_fraud(max_rows: int = 150_000) -> Optional[pd.DataFrame]:
     f = _find_csv("online_fraud")
@@ -141,11 +141,11 @@ def load_online_fraud(max_rows: int = 150_000) -> Optional[pd.DataFrame]:
     return _to_unified(out)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 # Dataset 3: credit_score — monthly financial snapshots (100k customers)
 # Schema: Customer_ID, Month, Annual_Income, Monthly_Inhand_Salary,
 #         Num_Bank_Accounts, Outstanding_Debt, Monthly_Balance, Credit_Score
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 
 def load_credit_score(max_rows: int = 80_000) -> Optional[pd.DataFrame]:
     f = _find_csv("credit_score")
@@ -189,11 +189,11 @@ def load_credit_score(max_rows: int = 80_000) -> Optional[pd.DataFrame]:
     return _to_unified(out) if len(out) > 0 else None
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 # Dataset 4: credit_fraud (European CC — PCA transformed)
 # Schema: Time, V1..V28, Amount, Class
 # Use Amount + Time to derive spending patterns (no categories available)
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 
 def load_credit_fraud(max_rows: int = 50_000) -> Optional[pd.DataFrame]:
     f = _find_csv("credit_fraud")
@@ -218,12 +218,12 @@ def load_credit_fraud(max_rows: int = 50_000) -> Optional[pd.DataFrame]:
     return _to_unified(out)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 # Dataset 5: expense_classification — real personal finance (India, 2023-2024)
 # Schema: Date, title, category, account, amount, currency, type
 # 1,156 granular daily transactions — Food & Drinks, Transport, Bills & Fees etc.
 # This is the CLOSEST dataset to ByteWallet transaction structure.
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 
 def load_expense_classification() -> Optional[pd.DataFrame]:
     f = _find_csv("expense_classification")
@@ -273,10 +273,10 @@ def load_expense_classification() -> Optional[pd.DataFrame]:
     return _to_unified(out)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 # Dataset 6: User Provided — personal_expense_classification.csv
 # 100 rows of very clean merchant data (Amazon, Starbucks, Netflix etc)
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 
 def load_user_personal_expense() -> Optional[pd.DataFrame]:
     f = _find_csv("user_personal_expense")
@@ -312,9 +312,9 @@ def load_user_personal_expense() -> Optional[pd.DataFrame]:
     return _to_unified(out)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 # Dataset 7: Gen Z Spending (1,700 users x 15 columns)
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 
 def load_genz_spending() -> Optional[pd.DataFrame]:
     f = _find_csv("genz_spending")
@@ -355,9 +355,9 @@ def load_genz_spending() -> Optional[pd.DataFrame]:
     return _to_unified(out)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 # Dataset 8: MoMo e-Wallet (13,000+ Vietnam Mobile Topups)
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 
 def load_momo_merged() -> Optional[pd.DataFrame]:
     f = _find_csv("momo_merged")
@@ -378,9 +378,9 @@ def load_momo_merged() -> Optional[pd.DataFrame]:
     return _to_unified(out)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 # Master loader
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 
 def load_all_kaggle() -> pd.DataFrame:
     """
