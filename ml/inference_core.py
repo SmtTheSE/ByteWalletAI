@@ -162,7 +162,21 @@ def predict_burn_risk_from_snapshot(snapshot: dict) -> dict:
     #  Projections 
     avg_daily_spend = spend_mtd / max(day, 1)
     predicted_total_spend    = avg_daily_spend * days_in_month
-    predicted_month_end_balance = total_balance - (predicted_total_spend - spend_mtd) - essential_total
+    remaining_spend          = predicted_total_spend - spend_mtd
+
+    # Internal Projected Income logic (used for smarter shortfall calculation)
+    projected_income = 0.0
+    if len(tx_df) > 0:
+        salary_history = tx_df[(tx_df["type"] == "income") & (tx_df["category"].str.lower() == "salary")]
+        if not salary_history.empty:
+            avg_salary = salary_history["amount"].mean()
+            # If no salary seen this month yet and before 28th
+            if inc_mtd[inc_mtd["category"].str.lower() == "salary"].empty and day < 28:
+                projected_income = float(avg_salary)
+
+    # Shortfall = (Current Balance + Projected Income) - (Remaining Spend + Obligations)
+    predicted_month_end_balance = (total_balance + projected_income) - remaining_spend - essential_total
+    
     budget_overshoot_amount  = max(predicted_total_spend - budget_total, 0.0)
     budget_overshoot_percent = budget_overshoot_amount / max(budget_total, 1.0)
 

@@ -10,7 +10,8 @@ This document serves as the internal technical specification and honest assessme
 Most digital wallets in Southeast Asia are **retrospective**—they show you pie charts of money you have *already* spent. 
 
 **ByteWallet AI is prospective.** 
-I designed this engine to predict a user's financial future before the end of the month arrives. If a user is going to fall short of their rent or exceed their monthly budget, the AI intercepts their current trajectory, calculates the probability of a shortfall, and delivers a surgically precise, personalized instruction to fix it (e.g., "Cut your Food spending by 20% this week").
+I designed this engine to predict a user's financial future before the end of the month arrives. If a user is going to fall short of their rent or exceed their monthly budget, the AI intercepts their current trajectory, calculates the probability of a shortfall, and delivers a
+surgically precise, personalized instruction to fix it (e.g., "Cut your Food spending by 20% this week").
 
 ---
 
@@ -98,7 +99,6 @@ Because the API I built computes this snapshot instantly, ByteWallet can produce
    A traffic light (Green / Yellow / Red) on the home screen next to their balance, updated every time they make a transaction. 
 3. **Category Interventions**: 
    When the user opens the "Shopping" tab to make a transfer to Shopee/Lazada, pop up an interception modal: *"Wait! Your `delta_spend_rate` is 15% higher than usual. If you buy this, your risk of breaking budget jumps to High."*
-4. **"Safe To Spend" Metric**: 
    Instead of viewing "Total Balance" (which gives a false sense of security), show the user "Safe Amount to Spend Today" calculated directly from the remaining non-allocated budget divided by remaining days.
 
 ---
@@ -109,8 +109,10 @@ In the second iteration of ByteWallet AI, I successfully integrated 5 new layers
 
 1. **Phase 1: Local Hybrid Architecture (ML + Ollama Voice)**
    Instead of just viewing dashboards, users now benefit from a true **Local Hybrid System**. 
-   - **The Engine:** The custom-trained Gradient Boosting model evaluates the user's spending first. 
-   - **The Voice:** If the user is *Above Budget* (High Risk), the backend passes the financial findings to a local **Ollama LLM** (e.g. Llama 3.2). Ollama acts strictly as a "personalized mouthpiece," forced to output a human-understandable actionable warning based on ML mathematical facts. This setup is 100% private and zero-cost, with no external API dependency or quota limits.
+   - **The Engine:** The custom-trained Gradient Boosting model evaluates the user's spending first, incorporating internal **Projected Income** detection to accurately determine the month-end balance.
+   - **The Smart Voice:** If the user is *High Risk*, the backend passes the financial findings to a local **Ollama LLM** (using `qwen2.5` for speed). If Ollama is unavailable, the **Dynamic Numerical Engine** takes over, providing precise shortfall calculations based on current velocity and upcoming bills.
+   - **Privacy First:** All analysis is performed offline. No financial data leaves the user's hardware.
+    -   **Privacy First:** All analysis is performed offline. No financial data leaves the user's hardware.
 
 2. **Phase 2: RAG on Transaction Memory**
    I implemented a local **ChromaDB Vector Store** that embeds every transaction a user makes. When a user asks a question, the AI retrieves semantically similar past transactions to use as context, giving the AI a true "personal memory" of the user's spending habits.
