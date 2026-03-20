@@ -68,13 +68,14 @@ async def predict_burn_rate(payload: PredictBurnRateRequest):
     if effective_mode == "auto":
         effective_mode = settings.ai_default_mode   # "local_only" or "rules_only"
 
-    # 6. Messaging rules (fallback if no LLM)
-    ai_mode_used = "rules_only"
-    ai_message, ai_mode_used = messaging_service.generate_ai_message(
+    # 6. Messaging rules (Smart LLM + Rules Fallback)
+    ai_message, ai_mode_used = await messaging_service.generate_smart_ai_message(
+        snapshot=snapshot,
+        stats=stats,
+        rule_result=rule_result,
         nickname=payload.nickname,
         currency=payload.currency,
-        stats=stats,
-        mode=ai_mode_used,
+        mode=effective_mode,
     )
 
     #  7. Assemble response 
