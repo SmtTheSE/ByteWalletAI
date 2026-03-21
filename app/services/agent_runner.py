@@ -17,6 +17,7 @@ from app.agents.savings_agent import SavingsAgent
 from app.agents.liquidity_agent import LiquidityAgent
 from app.agents.income_agent import IncomeAgent
 from app.agents.goal_agent import GoalAgent
+from app.agents.midmonth_agent import MidMonthAgent
 
 log = logging.getLogger("agent_runner")
 
@@ -28,6 +29,7 @@ _AGENTS = [
     LiquidityAgent(),
     IncomeAgent(),
     GoalAgent(),
+    MidMonthAgent(),
 ]
 
 # Severity ordering for deduplication priority
