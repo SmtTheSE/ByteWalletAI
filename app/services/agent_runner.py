@@ -14,6 +14,9 @@ from app.agents.base_agent import Alert
 from app.agents.subscription_agent import SubscriptionAgent
 from app.agents.anomaly_agent import AnomalyAgent
 from app.agents.savings_agent import SavingsAgent
+from app.agents.liquidity_agent import LiquidityAgent
+from app.agents.income_agent import IncomeAgent
+from app.agents.goal_agent import GoalAgent
 
 log = logging.getLogger("agent_runner")
 
@@ -22,6 +25,9 @@ _AGENTS = [
     SubscriptionAgent(),
     AnomalyAgent(),
     SavingsAgent(),
+    LiquidityAgent(),
+    IncomeAgent(),
+    GoalAgent(),
 ]
 
 # Severity ordering for deduplication priority

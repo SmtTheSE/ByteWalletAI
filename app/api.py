@@ -68,7 +68,11 @@ async def predict_burn_rate(payload: PredictBurnRateRequest):
     if effective_mode == "auto":
         effective_mode = settings.ai_default_mode   # "local_only" or "rules_only"
 
-    # 6. Messaging rules (Smart LLM + Rules Fallback)
+    # 6. Proactive Agents (Phase 4: Anomaly, Subscription, Savings, Liquidity)
+    proactive_alerts_raw = run_all_agents(payload.user_id, snapshot)
+    proactive_alerts = [ProactiveAlert(**a) for a in proactive_alerts_raw]
+
+    # 7. Messaging rules (Smart LLM + Rules Fallback)
     ai_message, ai_mode_used = await messaging_service.generate_smart_ai_message(
         snapshot=snapshot,
         stats=stats,
@@ -76,9 +80,10 @@ async def predict_burn_rate(payload: PredictBurnRateRequest):
         nickname=payload.nickname,
         currency=payload.currency,
         mode=effective_mode,
+        proactive_alerts=proactive_alerts_raw, # Pass raw alerts for prompt context
     )
 
-    #  7. Assemble response 
+    #  8. Assemble response 
     trigger_flags = TriggerRuleFlags(
         day_fraction               = rule_result.day_fraction,
         budget_used_percent        = rule_result.budget_used_percent,
@@ -102,7 +107,7 @@ async def predict_burn_rate(payload: PredictBurnRateRequest):
         top_risky_categories         = risky_cats,
         ai_message                   = ai_message,
         ai_mode_used                 = ai_mode_used,
-        proactive_alerts             = [ProactiveAlert(**a) for a in run_all_agents(payload.user_id, snapshot)],
+        proactive_alerts             = proactive_alerts,
         generated_at                 = datetime.now(timezone.utc),
     )
 

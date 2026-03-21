@@ -63,6 +63,10 @@ serve(async (req) => {
     monthly_budget: {
       total: budgets.reduce((acc, b) => acc + Number(b.amount), 0)
     },
+    // NEW: Phase 4.5 Intelligence Fields
+    essential_obligations: user.explicit_obligations || [], 
+    savings_goals: user.savings_goals || [], 
+    
     transactions: transactions.map(t => ({
       timestamp: t.timestamp,
       amount: Number(t.amount),
@@ -84,22 +88,32 @@ serve(async (req) => {
   const result = await aiResponse.json()
 
   // 4. Save Core AI Message to Notifications Table
+  // This message is a synthesized 'God-mode' coaching tip from all 6 agents.
   if (result.ai_message) {
     await supabase.from('notifications').insert({
       user_id: user_id,
       type: 'ai_insight',
       message: result.ai_message,
-      data: { risk_level: result.risk_level, shortfall_prob: result.shortfall_prob }
+      data: { 
+        risk_level: result.risk_level, 
+        shortfall_prob: result.shortfall_prob,
+        mode: result.ai_mode_used 
+      }
     })
   }
 
-  // 5. Save Proactive Alerts (Phase 4 Agents)
+  // 5. Save Proactive Alerts (Individual Signals)
   if (result.proactive_alerts && result.proactive_alerts.length > 0) {
     const alertsToInsert = result.proactive_alerts.map((alert: any) => ({
       user_id: user_id,
-      type: alert.type, // 'anomaly', 'savings', 'subscription'
+      type: alert.type, // 'liquidity', 'income', 'goal', 'anomaly', 'savings', 'subscription'
       message: alert.message,
-      data: { title: alert.title, action: alert.suggested_action, ...alert.metadata }
+      data: { 
+        title: alert.title, 
+        action: alert.suggested_action, 
+        severity: alert.severity,
+        ...alert.metadata // For 'liquidity', includes 'shortfall_amount' and 'items_to_cut'
+      }
     }))
     await supabase.from('notifications').insert(alertsToInsert)
   }
