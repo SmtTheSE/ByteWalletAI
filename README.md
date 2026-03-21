@@ -1,7 +1,7 @@
 # ByteWallet AI
 
 > **AI-powered financial burn-rate prediction for ASEAN youth.**
-> Custom ML model — privacy-first, purely on-device mathematical predictions.
+> Custom ML model --- privacy-first, purely on-device mathematical predictions.
 
 ---
 
@@ -48,20 +48,20 @@ Wallet Frontend
 
 In addition to the core ML predictor, ByteWallet AI implements a 5-phase intelligence upgrade:
 
-1. **Phase 1: Local Hybrid Architecture (ML + Ollama Voice)** — Automatically routes high-risk findings from the Custom ML model to a local **Ollama** instance. Includes an **Adaptive Regex Engine** (10s fallback) for hyper-personalized coaching without an LLM.
-2. **Phase 2: RAG on Transactions** — Uses a local ChromaDB vector store to embed user transaction history, providing personalized context to the generative engine.
-3. **Phase 3: Hyper-Granular Enrichment** — Enriches raw transactions with temporal (payday week), spatial (CBD buckets), and behavioral (impulse score, recurrence) features for both RAG and ML.
-4. **Phase 4: Proactive Multi-Agent Reasoning** — An orchestration layer running Subscription, Anomaly, and Savings agents in parallel during every `/predict-burn-rate` call to emit actionable warnings.
-5. **Phase 5: Federated Learning (Edge AI)** — A `FedAvg` local server combined with a client simulator that trains the models on-device and transmits only mathematical weight deltas to protect privacy.
+1. **Phase 1: Local Hybrid Architecture (ML + Ollama Voice)** --- Automatically routes high-risk findings from the Custom ML model to a local **Ollama** instance. Includes an **Adaptive Regex Engine** (10s fallback) for hyper-personalized coaching without an LLM.
+2. **Phase 2: RAG on Transactions** --- Uses a local ChromaDB vector store to embed user transaction history, providing personalized context to the generative engine.
+3. **Phase 3: Hyper-Granular Enrichment** --- Enriches raw transactions with temporal (payday week), spatial (CBD buckets), and behavioral (impulse score, recurrence) features for both RAG and ML.
+4. **Phase 4: Proactive Multi-Agent Reasoning** --- An orchestration layer running 6 specialized agents: Liquidity (Condition-1), Income, Goal, Subscription, Anomaly, and Savings.
+5. **Phase 5: Federated Learning (Edge AI)** --- A `FedAvg` local server combined with a client simulator that trains the models on-device and transmits only mathematical weight deltas to protect privacy.
 
 ---
 
-## 🚀 One-Click Cloud Deployment
+## One-Click Cloud Deployment
 ByteWallet AI is pre-configured for **Render**. Use the `render.yaml` file to deploy as a Blueprint. See [DEPLOYMENT_GUIDE_RENDER.md](file:///Users/sittminthar/Desktop/AI%20YOUTH%20INC/bytewallet_ai/docs/DEPLOYMENT_GUIDE_RENDER.md) for details.
 
 ---
 
-## 🛠️ Local Installation
+## Local Installation
 
 ### 1. Install dependencies
 
@@ -89,7 +89,7 @@ This will:
 uvicorn app.main:app --reload --port 8000
 ```
 
-Open: http://localhost:8000/docs — Swagger UI with live testing.
+Open: http://localhost:8000/docs --- Swagger UI with live testing.
 
 ---
 
@@ -128,7 +128,7 @@ curl -X POST http://localhost:8000/v1/predict-burn-rate \
       "projected_spent": 396000
     }
   ],
-  "ai_message": "Hey Ku Kue, you've already used 68% of your budget halfway through the month — things are tight! Food spending is your biggest category this month. Try cooking at home for the next 3 days to save around 90,000 VND.",
+  "ai_message": "Hey Ku Kue, you've already used 68% of your budget halfway through the month --- things are tight! Food spending is your biggest category this month. Try cooking at home for the next 3 days to save around 90,000 VND.",
   "ai_mode_used": "rules_only",
   "generated_at": "2026-03-18T13:00:00Z"
 }
@@ -213,15 +213,15 @@ python -m pytest tests/ -v
 
 ---
 
-## AI Ready ASEAN Youth Challenge — Alignment
+## AI Ready ASEAN Youth Challenge --- Alignment
 
 | Focus Area | How ByteWallet AI addresses it |
 |------------|-------------------------------|
 | **Knowledge, Skills & Learning** | Financial literacy through everyday AI nudges, not classroom lectures |
 | **Stronger Communities** | Shared budgeting culture, reduced scam vulnerability, peer savings challenges |
-| **SDG 1 — No Poverty** | Early-warning system that prevents youth from falling into debt cycles |
-| **SDG 4 — Quality Education** | Integrable into school financial literacy programs ("trainer mode") |
-| **SDG 8 — Decent Work** | Helps youth build saving habits needed to invest in skills/education |
+| **SDG 1 --- No Poverty** | Early-warning system that prevents youth from falling into debt cycles |
+| **SDG 4 --- Quality Education** | Integrable into school financial literacy programs ("trainer mode") |
+| **SDG 8 --- Decent Work** | Helps youth build saving habits needed to invest in skills/education |
 
 **Privacy:** All inference runs mathematically on-device without cloud computation. No financial data leaves the framework.
 
