@@ -49,6 +49,11 @@ class PredictBurnRateRequest(BaseModel):
     monthly_budget: MonthlyBudget
     essential_obligations: List[EssentialObligation] = []
     transactions: List[Transaction] = Field(..., description="At least current-month transactions; more = better")
+    
+    # New Alignment Schemas (Logic 1 & 2) from frontend
+    user_context: Optional[UserContext] = None
+    logic_signals: Optional[LogicSignals] = None
+    recommendation_engine: Optional[RecommendationEngine] = None
 
 
 #  Response model  #
@@ -66,6 +71,27 @@ class TriggerRuleFlags(BaseModel):
     hit_15th_65_percent_rule: bool
 
 
+#  New Alignment Schemas (Logic 1 & 2)  #
+
+class UserContext(BaseModel):
+    total_balance: float
+    essential_expenses: float
+    discretionary_baseline: float
+
+
+class LogicSignals(BaseModel):
+    shortfall_detected: bool
+    shortfall_amount: float
+    mid_month_alert: bool
+    usage_percentage: float
+
+
+class RecommendationEngine(BaseModel):
+    target_category: str
+    avg_cost_per_instance: float
+    required_avoidance_count: int
+
+
 class PredictBurnRateResponse(BaseModel):
     user_id: str
     currency: str
@@ -76,12 +102,18 @@ class PredictBurnRateResponse(BaseModel):
     budget_total: float
     budget_overshoot_amount: float
     budget_overshoot_percent: float
+    
+    # New Structured Alignment Fields
+    user_context: Optional[UserContext] = None
+    logic_signals: Optional[LogicSignals] = None
+    recommendation_engine: Optional[RecommendationEngine] = None
+
     trigger_rule: Optional[str]           # "15th_65_percent" or None
     trigger_rule_flags: TriggerRuleFlags
     top_risky_categories: List[RiskyCategory]
     ai_message: str
-    ai_mode_used: str                     # "rules_only"
-    proactive_alerts: List["ProactiveAlert"] = []  # Phase 4: agent-generated alerts
+    ai_mode_used: str                     # "rules_only", "ollama"
+    proactive_alerts: List[ProactiveAlert] = []  # Phase 4: agent-generated alerts
     generated_at: datetime
 
 
@@ -99,6 +131,7 @@ class ProactiveAlert(BaseModel):
 
 # Update forward ref
 PredictBurnRateResponse.model_rebuild()
+PredictBurnRateRequest.model_rebuild()
 
 
 #  Phase 1: Chat models  #

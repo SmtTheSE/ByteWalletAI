@@ -17,7 +17,8 @@ from app.agents.base_agent import BaseAgent, Alert
 log = logging.getLogger("liquidity_agent")
 
 ESSENTIAL_CATEGORIES = {"rent", "subscription", "education", "utilities", "bills"}
-LESS_IMPORTANT_CATEGORIES = {"shopping", "entertainment", "food", "lifestyle"}
+# Aligned with Logic 1: Identifying 'Avoidable' Categories
+LESS_IMPORTANT_CATEGORIES = {"shopping", "entertainment", "food", "lifestyle", "snacks", "coffee", "drinks", "milktea"}
 
 class LiquidityAgent(BaseAgent):
     name = "liquidity_agent"

@@ -89,7 +89,8 @@ class MidMonthAgent(BaseAgent):
                     metadata={
                         "actual_balance_baseline": round(actual_balance_baseline, 2),
                         "discretionary_spent": round(discretionary_spent, 2),
-                        "usage_ratio": round(usage_ratio, 3)
+                        "usage_ratio": round(usage_ratio, 3),
+                        "mid_month_alert": True
                     }
                 ))
 

@@ -18,7 +18,7 @@ from fastapi import APIRouter, Depends, Request
 
 from app.schemas import (
     PredictBurnRateRequest, PredictBurnRateResponse, RiskyCategory, TriggerRuleFlags,
-    ProactiveAlert,
+    ProactiveAlert, UserContext, LogicSignals, RecommendationEngine,
 )
 from app.services import ml_service, rules, messaging_service
 from app.services.agent_runner import run_all_agents
@@ -87,7 +87,38 @@ async def predict_burn_rate(
     proactive_alerts_raw = run_all_agents(payload.user_id, snapshot)
     proactive_alerts = [ProactiveAlert(**a) for a in proactive_alerts_raw]
 
-    # 7. Messaging rules (Smart LLM + Rules Fallback)
+    # 7. Extract Structured Alignment Signals (Logic 1 & 2)
+    # Using data from Agents (Higher-order heuristics)
+    liquidity_alert = next((a for a in proactive_alerts_raw if a["agent"] == "liquidity_agent"), None)
+    midmonth_alert  = next((a for a in proactive_alerts_raw if a["agent"] == "midmonth_agent"), None)
+
+    # Calculate/Extract Discretionary Baseline
+    # Baseline = Total Balance - Essential Obligations (from snapshot/stats)
+    total_bal = float(snapshot.get("balances", {}).get("banking", 0)) + float(snapshot.get("balances", {}).get("cash", 0))
+    essential_total = stats.get("essential_total", 0.0)
+    discretionary_baseline = total_bal - essential_total
+
+    user_context = payload.user_context if payload.user_context else UserContext(
+        total_balance=total_bal,
+        essential_expenses=essential_total,
+        discretionary_baseline=discretionary_baseline
+    )
+
+    logic_signals = payload.logic_signals if payload.logic_signals else LogicSignals(
+        shortfall_detected = liquidity_alert is not None,
+        shortfall_amount   = liquidity_alert["metadata"]["shortfall_amount"] if liquidity_alert else 0.0,
+        mid_month_alert    = midmonth_alert is not None,
+        usage_percentage   = midmonth_alert["metadata"]["usage_ratio"] if midmonth_alert else (stats["spend_mtd"] / max(discretionary_baseline, 1.0))
+    )
+
+    # Recommendation Engine Alignment
+    recommendation_engine = payload.recommendation_engine if payload.recommendation_engine else RecommendationEngine(
+        target_category          = liquidity_alert["metadata"]["category_to_cut"] if liquidity_alert else "General Savings",
+        avg_cost_per_instance     = liquidity_alert["metadata"]["avg_item_price"] if liquidity_alert and "avg_item_price" in liquidity_alert["metadata"] else (liquidity_alert["metadata"].get("shortfall_amount", 0) / max(liquidity_alert["metadata"].get("items_to_cut", 1), 1) if liquidity_alert else 0.0),
+        required_avoidance_count = int(liquidity_alert["metadata"]["items_to_cut"]) if liquidity_alert and "items_to_cut" in liquidity_alert["metadata"] else 0
+    )
+
+    # 8. Messaging rules (Smart LLM + Rules Fallback)
     ai_message, ai_mode_used = await messaging_service.generate_smart_ai_message(
         snapshot=snapshot,
         stats=stats,
@@ -96,9 +127,11 @@ async def predict_burn_rate(
         currency=payload.currency,
         mode=effective_mode,
         proactive_alerts=proactive_alerts_raw, # Pass raw alerts for prompt context
+        logic_signals=logic_signals.model_dump(), # Pass new signals for reasoning
+        recommendation=recommendation_engine.model_dump()
     )
 
-    #  8. Assemble response 
+    #  9. Assemble response 
     trigger_flags = TriggerRuleFlags(
         day_fraction               = rule_result.day_fraction,
         budget_used_percent        = rule_result.budget_used_percent,
@@ -117,6 +150,9 @@ async def predict_burn_rate(
         budget_total                 = stats["budget_total"],
         budget_overshoot_amount      = stats["budget_overshoot_amount"],
         budget_overshoot_percent     = stats["budget_overshoot_percent"],
+        user_context                 = user_context,
+        logic_signals               = logic_signals,
+        recommendation_engine        = recommendation_engine,
         trigger_rule                 = rule_result.trigger_rule,
         trigger_rule_flags           = trigger_flags,
         top_risky_categories         = risky_cats,

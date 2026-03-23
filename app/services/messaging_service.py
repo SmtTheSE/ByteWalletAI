@@ -129,6 +129,8 @@ async def generate_smart_ai_message(
     currency: str,
     mode: str = "auto",
     proactive_alerts: List[dict] = None,
+    logic_signals: dict = None,
+    recommendation: dict = None,
 ) -> Tuple[str, str]:
     """
     Universal Command & Coaching Brain (Custom ML + Multi-Agent Alerts + Ollama).
@@ -154,15 +156,26 @@ async def generate_smart_ai_message(
     obligations = snapshot.get("essential_obligations", [])
     obs_text = ", ".join([f"{o['name']}: {o['amount']} {currency}" for o in obligations]) or "None"
 
-    # The AI Coach Prompt inherits all agent insights
+    # Logic 1 & 2 Specific Signals
+    shortfall_detected = logic_signals.get("shortfall_detected", False) if logic_signals else False
+    shortfall_amt = logic_signals.get("shortfall_amount", 0) if logic_signals else 0
+    mid_month = logic_signals.get("mid_month_alert", False) if logic_signals else False
+    
+    target_cat = recommendation.get("target_category", "non-essentials") if recommendation else "non-essentials"
+    avoid_count = recommendation.get("required_avoidance_count", 0) if recommendation else 0
+
+    # The AI Coach Prompt inherits all agent insights + Logic 1 & 2 rigid math
     prompt = (
         f"You are ByteWallet AI, a local financial coach for ASEAN youth. Context for '{name}':\n"
         f"- Risk Level: {risk_level.upper()}\n"
         f"- Wallet: {total_balance} {currency} balance; {spend_mtd} spent this month.\n"
-        f"- Bills: {obs_text}\n"
+        f"- Logic 1 (Shortfall): {'YES' if shortfall_detected else 'No'}. Shortfall: {shortfall_amt} {currency}.\n"
+        f"- Logic 2 (Mid-month): {'YES' if mid_month else 'No'}.\n"
+        f"- Recommendation: To cover shortfall, avoid {avoid_count} {target_cat} purchases.\n"
         f"- Intelligence Signals: {top_issues if top_issues else 'All systems green'}.\n\n"
         f"Task: Generate a friendly, supportive 2-sentence coaching tip. "
-        f"Prioritize mentioning the most severe Intelligence Signal if it exists. "
+        f"If there is a shortfall, explain how many {target_cat} to avoid. "
+        f"If Logic 2 triggered, mention the mid-month 50% threshold. "
         f"No markdown, no emojis. Be direct and local-only."
     )
 
