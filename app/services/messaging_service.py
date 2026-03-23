@@ -55,6 +55,8 @@ def generate_ai_message(
     snapshot: dict | None = None,
     mode: str = "rules_only",
     proactive_alerts: List[dict] = None,
+    logic_signals: dict = None,
+    recommendation: dict = None,
 ) -> Tuple[str, str]:
     """
     Generate a dynamic coaching message based on math rules, prioritized alerts,
@@ -64,11 +66,26 @@ def generate_ai_message(
     risk = stats.get("risk_level", "medium")
     alerts = proactive_alerts or []
     
-    # 1. Check for Critical Agent Alerts First (Condition-1, etc.)
+    # 1. Evaluate Logic 1 & 2 Frontend Signals immediately (Source of Truth)
+    shortfall_detected = logic_signals.get("shortfall_detected", False) if logic_signals else False
+    shortfall_amt = logic_signals.get("shortfall_amount", 0) if logic_signals else 0
+    mid_month = logic_signals.get("mid_month_alert", False) if logic_signals else False
+    usage_pct = logic_signals.get("usage_percentage", 0) * 100 if logic_signals else 0
+    
+    target_cat = recommendation.get("target_category", "non-essentials") if recommendation else "non-essentials"
+    avoid_count = recommendation.get("required_avoidance_count", 0) if recommendation else 0
+
+    if shortfall_detected and avoid_count > 0:
+        return f"Hey {name}, you have a projected shortfall of {shortfall_amt:,.0f} {currency}. To cover this, try avoiding {target_cat} purchases {avoid_count} times.", "rules_only"
+
+    if mid_month:
+        return f"Hey {name}, heads up! You've used {usage_pct:.1f}% of your available discretionary funds midway through the month. Try to slow down non-essential spending.", "rules_only"
+    
+    # 2. Check for Critical Agent Alerts (Anomaly, Subscription, Goal, etc.)
     sorted_alerts = sorted(alerts, key=lambda a: _COACHING_PRIORITY.get(a["type"], 99))
     top_alert = sorted_alerts[0] if sorted_alerts else None
     
-    # If we have a high-priority alert, use it as the core message
+    # If we have a high-priority agent alert, use it as the core message
     if top_alert and (top_alert["severity"] in ("critical", "warning")):
         msg = f"Hey {name}, {top_alert['message']} {top_alert['suggested_action']}"
         return msg, "rules_only"
@@ -140,7 +157,7 @@ async def generate_smart_ai_message(
     alerts = proactive_alerts or []
 
     if mode == "rules_only":
-        return generate_ai_message(nickname, currency, stats, snapshot, mode, alerts)
+        return generate_ai_message(nickname, currency, stats, snapshot, mode, alerts, logic_signals, recommendation)
 
     name = nickname or "friend"
     
@@ -185,4 +202,4 @@ async def generate_smart_ai_message(
         return res, "ollama"
 
     # 2. Fallback: Prioritized Math Rules
-    return generate_ai_message(nickname, currency, stats, snapshot, mode, alerts)
+    return generate_ai_message(nickname, currency, stats, snapshot, mode, alerts, logic_signals, recommendation)
