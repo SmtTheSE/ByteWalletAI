@@ -10,7 +10,7 @@ ByteWallet AI exposes a hybrid API with both predictive math and generative AI:
 ```
 POST /v1/predict-burn-rate
 ```
-The core hybrid endpoint. Combines **Custom ML Inference** with **Local LLM (Ollama)** voice generation. Calculates `risk_level`, numeric projections, and a hyper-personalized coaching message completely offline.
+The core hybrid endpoint. Combines **Custom ML Inference** with **Local LLM (Ollama)** voice generation, and rigidly incorporates **Frontend-calculated Heuristic Flags (Logic 1 & 2)**. Calculates `risk_level`, numeric projections, and a hyper-personalized coaching message completely offline driven by the factual frontend triggers.
 
 ```
 POST /v1/federated/submit-update
@@ -28,19 +28,24 @@ Wallet Frontend
 
   FastAPI App (app/)             
                                  
-  1. ML Service   Custom GradientBoostingClassifier
+  1. Hybrid Input   Frontend calculates Logic 1 (Shortfall) and 
+                    Logic 2 (Mid-Month Check) mathematically and 
+                    passes them as deterministic signal flags.
+                    
+  2. ML Service   Custom GradientBoostingClassifier
      (ml/inference_core.py)       trained on:
                                   • Real ByteWallet CSV data (85 real txns)
                                   • Kaggle financial datasets (8 datasets)
                                   • Synthetic ASEAN youth data
                                                            
-  2. Rules Service  Adaptive AI Risk Engine
+  3. Rules Service  Adaptive AI Risk Engine
      (app/services/rules.py)
                                                            
-  3. Messaging Service  Adaptive Regex Engine
-     (app/services/messaging_service.py) No PII sent. Runs entirely offline.
+  4. Messaging Service  Adaptive Generative Engine
+     (app/services/messaging_service.py) Integrates the rigid frontend signals 
+                                         to generate 0-hallucination coaching.
                                                            
-  4. Response assembled & returned to frontend             
+  5. Response assembled & returned to frontend             
 -
 ```
 
@@ -101,7 +106,7 @@ curl -X POST http://localhost:8000/v1/predict-burn-rate \
   -d @tests/sample_kukue_request.json
 ```
 
-**Sample Response:**
+**Sample Response (with Logic Alignment):**
 
 ```json
 {
@@ -114,6 +119,22 @@ curl -X POST http://localhost:8000/v1/predict-burn-rate \
   "budget_total": 3000000,
   "budget_overshoot_amount": 345000,
   "budget_overshoot_percent": 0.115,
+  "user_context": {
+    "total_balance": 5000000,
+    "essential_expenses": 2000000,
+    "discretionary_baseline": 3000000
+  },
+  "logic_signals": {
+    "shortfall_detected": true,
+    "shortfall_amount": 500000,
+    "mid_month_alert": true,
+    "usage_percentage": 0.68
+  },
+  "recommendation_engine": {
+    "target_category": "Food",
+    "avg_cost_per_instance": 22900,
+    "required_avoidance_count": 22
+  },
   "trigger_rule": "15th_65_percent",
   "trigger_rule_flags": {
     "day_fraction": 0.58,
@@ -128,7 +149,7 @@ curl -X POST http://localhost:8000/v1/predict-burn-rate \
       "projected_spent": 396000
     }
   ],
-  "ai_message": "Hey Ku Kue, you've already used 68% of your budget halfway through the month --- things are tight! Food spending is your biggest category this month. Try cooking at home for the next 3 days to save around 90,000 VND.",
+  "ai_message": "Hey Ku Kue, you've already used 68% of your budget halfway through the month --- things are tight! Avoid spending on Food 22 times this month to cover your predicted shortfall of 500,000 VND.",
   "ai_mode_used": "rules_only",
   "generated_at": "2026-03-18T13:00:00Z"
 }
