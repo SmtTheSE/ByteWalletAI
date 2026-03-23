@@ -3,7 +3,10 @@ tests/test_api.py
 
 Integration tests for POST /v1/predict-burn-rate.
 Run with:  cd bytewallet_ai && python -m pytest tests/ -v
+
+NOTE: Tests now support API authentication. Set API_KEYS in .env for auth-enabled tests.
 """
+import os
 import pytest
 from fastapi.testclient import TestClient
 
@@ -12,8 +15,18 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app.main import app
+from app.config import settings
 
 client = TestClient(app)
+
+
+def get_test_headers():
+    """Get headers required for API requests (includes API key if configured)."""
+    headers = {"Content-Type": "application/json"}
+    # If API auth is enabled, use the first key for tests
+    if settings.api_auth_enabled and settings.api_keys_list:
+        headers["X-API-Key"] = settings.api_keys_list[0]
+    return headers
 
 
 #  Fixtures 
@@ -79,9 +92,20 @@ def test_health():
     assert res.json()["status"] == "healthy"
 
 
+def test_health_unprotected():
+    """Health endpoints should work without API key."""
+    res = client.get("/")
+    assert res.status_code == 200
+    assert res.json()["status"] == "ok"
+
+
 def test_high_risk_response():
     """High-risk user → risk_level high, 15th/65% rule triggered, message returned."""
-    res = client.post("/v1/predict-burn-rate", json=_high_risk_payload())
+    res = client.post(
+        "/v1/predict-burn-rate",
+        json=_high_risk_payload(),
+        headers=get_test_headers()
+    )
     assert res.status_code == 200, res.text
     data = res.json()
 
@@ -98,7 +122,11 @@ def test_high_risk_response():
 
 def test_low_risk_response():
     """Low-risk user → risk_level low, no rule trigger, encouraging message."""
-    res = client.post("/v1/predict-burn-rate", json=_low_risk_payload())
+    res = client.post(
+        "/v1/predict-burn-rate",
+        json=_low_risk_payload(),
+        headers=get_test_headers()
+    )
     assert res.status_code == 200, res.text
     data = res.json()
 
@@ -115,7 +143,11 @@ def test_missing_transactions():
     """API should still work with zero transactions."""
     payload = _low_risk_payload()
     payload["transactions"] = []
-    res = client.post("/v1/predict-burn-rate", json=payload)
+    res = client.post(
+        "/v1/predict-burn-rate",
+        json=payload,
+        headers=get_test_headers()
+    )
     assert res.status_code == 200
     data = res.json()
     assert data["risk_level"] in ("low", "medium", "high")
@@ -123,7 +155,11 @@ def test_missing_transactions():
 
 def test_response_shape():
     """Response must have all required fields."""
-    res = client.post("/v1/predict-burn-rate", json=_high_risk_payload())
+    res = client.post(
+        "/v1/predict-burn-rate",
+        json=_high_risk_payload(),
+        headers=get_test_headers()
+    )
     assert res.status_code == 200
     data = res.json()
     required = [
@@ -135,3 +171,27 @@ def test_response_shape():
     ]
     for field in required:
         assert field in data, f"Missing field: {field}"
+
+
+@pytest.mark.skipif(
+    not settings.api_auth_enabled,
+    reason="API auth is disabled (dev mode)"
+)
+def test_api_key_required_when_auth_enabled():
+    """When API auth is enabled, requests without key should fail."""
+    res = client.post("/v1/predict-burn-rate", json=_high_risk_payload())
+    assert res.status_code == 401
+
+
+@pytest.mark.skipif(
+    not settings.api_auth_enabled,
+    reason="API auth is disabled (dev mode)"
+)
+def test_invalid_api_key_rejected():
+    """Invalid API keys should be rejected."""
+    res = client.post(
+        "/v1/predict-burn-rate",
+        json=_high_risk_payload(),
+        headers={"X-API-Key": "invalid-key-12345"}
+    )
+    assert res.status_code == 403

@@ -2,14 +2,19 @@
 app/api.py
 
 FastAPI route definitions:
-  - POST /v1/predict-burn-rate   — ML burn-rate prediction
-  - POST /v1/chat                — Phase 1: NL Function Calling (Gemini)
+  - POST /v1/predict-burn-rate   — ML burn-rate prediction (protected)
+  - POST /v1/chat                — Phase 1: NL Function Calling (protected)
+  - Federated learning endpoints — (protected)
+  - Health checks                — (public)
+
+Security: All prediction endpoints require X-API-Key header in production.
 """
 import calendar
 import logging
 from datetime import datetime, timezone
+from typing import Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, Request
 
 from app.schemas import (
     PredictBurnRateRequest, PredictBurnRateResponse, RiskyCategory, TriggerRuleFlags,
@@ -18,15 +23,25 @@ from app.schemas import (
 from app.services import ml_service, rules, messaging_service
 from app.services.agent_runner import run_all_agents
 from app.config import settings
+from app.security import verify_api_key
 
 log = logging.getLogger("api")
 router = APIRouter()
 
 
-@router.post("/v1/predict-burn-rate", response_model=PredictBurnRateResponse)
-async def predict_burn_rate(payload: PredictBurnRateRequest):
+@router.post(
+    "/v1/predict-burn-rate",
+    response_model=PredictBurnRateResponse,
+    dependencies=[Depends(verify_api_key)],
+)
+async def predict_burn_rate(
+    payload: PredictBurnRateRequest,
+    request: Request,
+):
     """
     Predict financial burn-rate risk for a given user.
+    
+    **Protected:** Requires X-API-Key header when API_AUTH_ENABLED is set.
 
     Steps:
       1. Convert payload → snapshot dict
@@ -112,13 +127,19 @@ async def predict_burn_rate(payload: PredictBurnRateRequest):
     )
 
 
-#  Phase 5: Federated Learning 
+#  Phase 5: Federated Learning (Protected Endpoints) 
 
-@router.get("/v1/federated/model", tags=["federated"])
-async def get_federated_model():
+@router.get(
+    "/v1/federated/model",
+    tags=["federated"],
+    dependencies=[Depends(verify_api_key)],
+)
+async def get_federated_model(request: Request):
     """
     Download the current global federated model weights.
     Clients call this before local training to get the latest global model.
+    
+    **Protected:** Requires X-API-Key header when API_AUTH_ENABLED is set.
     """
     from ml.federated.server import get_federated_server
     server = get_federated_server()
@@ -129,8 +150,12 @@ async def get_federated_model():
     }
 
 
-@router.post("/v1/federated/submit-update", tags=["federated"])
-async def submit_federated_update(payload: dict):
+@router.post(
+    "/v1/federated/submit-update",
+    tags=["federated"],
+    dependencies=[Depends(verify_api_key)],
+)
+async def submit_federated_update(payload: dict, request: Request):
     """
     Accept a weight delta from a client device.
 
@@ -142,6 +167,8 @@ async def submit_federated_update(payload: dict):
     }
 
     Raw transaction data is NEVER sent — only the mathematical delta.
+    
+    **Protected:** Requires X-API-Key header when API_AUTH_ENABLED is set.
     """
     from ml.federated.server import get_federated_server
     server = get_federated_server()

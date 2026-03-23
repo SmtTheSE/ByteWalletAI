@@ -19,13 +19,15 @@ from __future__ import annotations
 
 import json
 import logging
-import threading
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
+import asyncio
 
 import numpy as np
+
+from app.config import settings
 
 log = logging.getLogger("federated_server")
 
@@ -45,21 +47,23 @@ class ClientUpdate:
     submitted_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
-class FedAvgServer:
+class AsyncFedAvgServer:
     """
-    Federated Averaging (FedAvg) server.
+    Federated Averaging (FedAvg) server with asyncio support.
 
     Collects weight deltas from clients and aggregates them using
     weighted averaging proportional to each client's sample count.
     Aggregation is triggered when `min_clients_to_aggregate` updates are queued.
+    
+    Uses asyncio.Lock instead of threading.Lock for FastAPI-native async.
     """
 
-    def __init__(self, min_clients_to_aggregate: int = 3):
-        self._lock = threading.Lock()
+    def __init__(self, min_clients_to_aggregate: Optional[int] = None):
+        self._lock = asyncio.Lock()
         self._pending_updates: list[ClientUpdate] = []
         self._global_weights: Optional[dict[str, np.ndarray]] = None
         self._version: int = 0
-        self._min_clients = min_clients_to_aggregate
+        self._min_clients = min_clients_to_aggregate or settings.fed_min_clients
         self._total_rounds = 0
 
         self._load_global_state()
@@ -93,7 +97,7 @@ class FedAvgServer:
             "updated_at":   datetime.now(timezone.utc).isoformat(),
         }))
 
-    def submit_update(
+    async def submit_update(
         self,
         client_id:    str,
         weight_delta: dict[str, list],
@@ -114,7 +118,7 @@ class FedAvgServer:
         # Convert lists back to numpy arrays
         np_delta = {k: np.array(v) for k, v in weight_delta.items()}
 
-        with self._lock:
+        async with self._lock:
             self._pending_updates.append(ClientUpdate(
                 client_id=client_id,
                 weight_delta=np_delta,
@@ -127,7 +131,7 @@ class FedAvgServer:
 
             aggregated = False
             if len(self._pending_updates) >= self._min_clients:
-                self._aggregate()
+                await self._aggregate()
                 aggregated = True
 
         return {
@@ -137,7 +141,7 @@ class FedAvgServer:
             "pending_updates": len(self._pending_updates),
         }
 
-    def _aggregate(self):
+    async def _aggregate(self):
         """
         Perform FedAvg: weighted average of all pending weight deltas.
         Called internally when enough client updates are available.
@@ -194,6 +198,44 @@ class FedAvgServer:
         }
 
 
+#  Backwards-compatible synchronous wrapper  #
+
+class FedAvgServer:
+    """Legacy synchronous wrapper for AsyncFedAvgServer."""
+    
+    def __init__(self, min_clients_to_aggregate: int = 3):
+        self._async_server = AsyncFedAvgServer(min_clients_to_aggregate)
+    
+    def submit_update(self, client_id: str, weight_delta: dict, num_samples: int) -> dict:
+        """Synchronous wrapper for async submit."""
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # We're in an async context, need to use asyncio.run_coroutine_threadsafe
+                import concurrent.futures
+                with concurrent.futures.ThreadPoolExecutor() as pool:
+                    future = pool.submit(
+                        asyncio.run,
+                        self._async_server.submit_update(client_id, weight_delta, num_samples)
+                    )
+                    return future.result()
+            else:
+                return loop.run_until_complete(
+                    self._async_server.submit_update(client_id, weight_delta, num_samples)
+                )
+        except RuntimeError:
+            # No event loop, create one
+            return asyncio.run(
+                self._async_server.submit_update(client_id, weight_delta, num_samples)
+            )
+    
+    def get_global_weights(self) -> dict:
+        return self._async_server.get_global_weights()
+    
+    def get_status(self) -> dict:
+        return self._async_server.get_status()
+
+
 #  Singleton  #
 
 _server: Optional[FedAvgServer] = None
@@ -203,5 +245,5 @@ def get_federated_server() -> FedAvgServer:
     """Return the singleton FedAvgServer instance."""
     global _server
     if _server is None:
-        _server = FedAvgServer(min_clients_to_aggregate=3)
+        _server = FedAvgServer(min_clients_to_aggregate=settings.fed_min_clients)
     return _server
